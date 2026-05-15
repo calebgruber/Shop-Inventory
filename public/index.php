@@ -185,18 +185,43 @@
       .si-live-datetime {
         display: inline-flex;
         align-items: center;
+        gap: 0.5rem;
         font-variant-numeric: tabular-nums;
         font-size: 0.9rem;
         color: var(--tblr-secondary);
         padding: 0 0.35rem;
       }
 
+      .si-live-time {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.05rem;
+        color: var(--tblr-body-color);
+        letter-spacing: 0.01em;
+      }
+
+      .si-live-hours-minutes {
+        font-weight: 700;
+      }
+
+      .si-live-seconds {
+        font-weight: 300;
+        opacity: 0.7;
+      }
+
+      .si-live-date {
+        font-size: 0.8rem;
+        color: var(--tblr-secondary);
+        white-space: nowrap;
+      }
+
       .si-top-utility {
-        order: 3;
+        order: 2;
         margin-left: auto;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
       }
 
       .si-top-utility > .d-none.d-md-flex {
@@ -213,11 +238,11 @@
       }
 
       .si-site-header .navbar-toggler {
-        order: 4;
+        order: 3;
       }
 
       #navbar-menu {
-        order: 5;
+        order: 4;
         flex-basis: 100%;
         width: 100%;
         padding-top: 0.25rem;
@@ -226,7 +251,7 @@
       #navbar-menu .navbar-nav {
         gap: 0 !important;
         align-self: flex-end;
-        border-top: 1px solid var(--tblr-border-color);
+        border-bottom: 1px solid var(--tblr-border-color);
         width: 100%;
         padding-top: 0.25rem;
       }
@@ -240,8 +265,9 @@
       /* True tab shape */
       #navbar-menu .navbar-nav .nav-link {
         border: 1px solid transparent !important;
-        border-radius: 0 0 4px 4px !important;
-        margin: -1px 0 0 0 !important;
+        border-bottom: 0 !important;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        margin: 0 0 -1px 0 !important;
         padding-top: 0.6rem !important;
         padding-bottom: 0.6rem !important;
         background-color: color-mix(in srgb, var(--tblr-bg-surface) 94%, transparent);
@@ -258,8 +284,9 @@
       #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
       #navbar-menu .navbar-nav .nav-item.show > .nav-link {
         background-color: var(--tblr-bg-surface) !important;
-        border-color: var(--tblr-bg-surface) var(--tblr-border-color) var(--tblr-border-color) !important;
+        border-color: var(--tblr-border-color) var(--tblr-border-color) var(--tblr-bg-surface) !important;
         color: var(--tblr-body-color) !important;
+        box-shadow: inset 0 3px 0 var(--tblr-primary);
       }
 
       @media (max-width: 767.98px) {
@@ -269,6 +296,11 @@
         .si-site-header .navbar-toggler {
           order: 3;
           margin-left: auto;
+        }
+        .si-top-utility {
+          order: 4;
+          width: 100%;
+          justify-content: flex-end;
         }
       }
 
@@ -336,9 +368,15 @@
           </div>
           <!-- END NAVBAR LOGO -->
           <div class="navbar-nav flex-row order-md-last si-top-utility">
+            <div class="nav-item si-live-datetime" aria-live="polite">
+              <span class="si-live-time">
+                <span class="si-live-hours-minutes" id="si-live-hours-minutes">--:--</span><span class="si-live-seconds" id="si-live-seconds">:--</span>
+              </span>
+              <span class="si-live-date" id="si-live-date">--/--/----</span>
+            </div>
             <div class="d-none d-md-flex me-3">
               <!-- BEGIN THEME TOGGLE -->
-              <div class="nav-item">
+              <div class="nav-item si-theme-toggle">
                 <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" title="Enable dark mode" data-bs-toggle="tooltip" data-bs-placement="bottom">
                   <!-- Download SVG icon from http://tabler.io/icons/icon/moon -->
                   <svg
@@ -1112,9 +1150,6 @@
                 </div>
               </div>
               <!-- END LANGUAGE SELECTOR -->
-            </div>
-            <div class="nav-item si-live-datetime" aria-live="polite">
-              <span id="si-live-datetime">--</span>
             </div>
             <!-- BEGIN USER MENU -->
             <div class="nav-item dropdown si-user-menu">
@@ -6691,17 +6726,24 @@ This textarea grows automatically when you type more content into it.</textarea
         }
 
         /* ---- LIVE DATETIME ---- */
-        var liveClock = document.getElementById('si-live-datetime');
-        if (liveClock) {
+        var liveHoursMinutes = document.getElementById('si-live-hours-minutes');
+        var liveSeconds = document.getElementById('si-live-seconds');
+        var liveDate = document.getElementById('si-live-date');
+        if (liveHoursMinutes && liveSeconds && liveDate) {
           function updateLiveClock() {
-            liveClock.textContent = new Date().toLocaleString(undefined, {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
+            var now = new Date();
+            liveHoursMinutes.textContent = now.toLocaleTimeString(undefined, {
               hour: '2-digit',
               minute: '2-digit',
-              second: '2-digit',
               hour12: false
+            });
+            liveSeconds.textContent = ':' + now.toLocaleTimeString(undefined, {
+              second: '2-digit'
+            });
+            liveDate.textContent = now.toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
             });
           }
           updateLiveClock();
