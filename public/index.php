@@ -105,7 +105,7 @@
         gap: 0.5rem;
         width: fit-content;
         margin-bottom: 0 !important;
-        padding: 0.25rem 0.5rem;
+        padding: 0.25rem 0.9rem 0.25rem 0.5rem;
         border-radius: 0 9999px 9999px 0;
         line-height: 1.25;
         transition: background-color 0.2s ease, color 0.2s ease;
@@ -183,21 +183,33 @@
       }
 
       .si-live-datetime {
-        order: 2;
-        flex: 1 1 auto;
-        text-align: center;
+        display: inline-flex;
+        align-items: center;
         font-variant-numeric: tabular-nums;
         font-size: 0.9rem;
         color: var(--tblr-secondary);
+        padding: 0 0.35rem;
       }
 
       .si-top-utility {
         order: 3;
         margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
       }
 
       .si-top-utility > .d-none.d-md-flex {
+        display: flex !important;
+        margin-right: 0 !important;
+      }
+
+      .si-top-utility > .d-none.d-md-flex > .nav-item:not(:first-child) {
         display: none !important;
+      }
+
+      .si-top-utility .nav-item.si-user-menu {
+        margin-left: 0.1rem;
       }
 
       .si-site-header .navbar-toggler {
@@ -214,8 +226,9 @@
       #navbar-menu .navbar-nav {
         gap: 0 !important;
         align-self: flex-end;
-        border-bottom: 1px solid var(--tblr-border-color);
+        border-top: 1px solid var(--tblr-border-color);
         width: 100%;
+        padding-top: 0.25rem;
       }
       #navbar-menu .navbar-nav .nav-item {
         margin: 0 !important;
@@ -227,8 +240,8 @@
       /* True tab shape */
       #navbar-menu .navbar-nav .nav-link {
         border: 1px solid transparent !important;
-        border-radius: 4px 4px 0 0 !important;
-        margin: 0 0 -1px 0 !important;
+        border-radius: 0 0 4px 4px !important;
+        margin: -1px 0 0 0 !important;
         padding-top: 0.6rem !important;
         padding-bottom: 0.6rem !important;
         background-color: color-mix(in srgb, var(--tblr-bg-surface) 94%, transparent);
@@ -245,15 +258,13 @@
       #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
       #navbar-menu .navbar-nav .nav-item.show > .nav-link {
         background-color: var(--tblr-bg-surface) !important;
-        border-color: var(--tblr-border-color) var(--tblr-border-color) var(--tblr-bg-surface) !important;
+        border-color: var(--tblr-bg-surface) var(--tblr-border-color) var(--tblr-border-color) !important;
         color: var(--tblr-body-color) !important;
       }
 
       @media (max-width: 767.98px) {
         .si-live-datetime {
-          order: 4;
-          width: 100%;
-          text-align: left;
+          display: none;
         }
         .si-site-header .navbar-toggler {
           order: 3;
@@ -324,9 +335,6 @@
             ></a>
           </div>
           <!-- END NAVBAR LOGO -->
-          <div class="si-live-datetime" aria-live="polite">
-            <span id="si-live-datetime">--</span>
-          </div>
           <div class="navbar-nav flex-row order-md-last si-top-utility">
             <div class="d-none d-md-flex me-3">
               <!-- BEGIN THEME TOGGLE -->
@@ -1104,6 +1112,9 @@
                 </div>
               </div>
               <!-- END LANGUAGE SELECTOR -->
+            </div>
+            <div class="nav-item si-live-datetime" aria-live="polite">
+              <span id="si-live-datetime">--</span>
             </div>
             <!-- BEGIN USER MENU -->
             <div class="nav-item dropdown si-user-menu">
