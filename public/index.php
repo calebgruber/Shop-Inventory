@@ -42,6 +42,130 @@
     </style>
     <!-- END CUSTOM FONT -->
     <!-- Source: calebgruber/custom-tabler branch copilot/remove-other-navbars (built locally for this repo) -->
+    <style>
+      :root {
+        --si-page-light-bg: #f3f8ff;
+        --si-navbar-tab-color: #2f6fed;
+      }
+
+      html[data-bs-theme="light"] body,
+      html:not([data-bs-theme]) body,
+      html[data-bs-theme="light"] .page,
+      html:not([data-bs-theme]) .page {
+        background-color: var(--si-page-light-bg);
+      }
+
+      .btn,
+      .btn-close {
+        border-radius: 1px !important;
+      }
+
+      .card,
+      .alert,
+      .badge,
+      .avatar,
+      .tag,
+      .steps .step-item {
+        border-radius: 2px !important;
+      }
+
+      .form-control,
+      .form-select,
+      .form-check-input,
+      .input-group-text {
+        border-radius: 1px !important;
+      }
+
+      .card {
+        --si-card-bg: #f8fbff;
+        --si-card-border: #bdd3f3;
+        --si-card-accent: #2f6fed;
+        --si-card-title: #194d9b;
+        background-color: var(--si-card-bg);
+        border: 1px solid var(--si-card-border);
+        border-left: 5px solid var(--si-card-accent);
+      }
+
+      .card .card-title {
+        color: var(--si-card-title) !important;
+      }
+
+      .card:nth-of-type(6n + 1) {
+        --si-card-bg: #eef6ff;
+        --si-card-border: #b6d5ff;
+        --si-card-accent: #2f6fed;
+        --si-card-title: #164887;
+      }
+
+      .card:nth-of-type(6n + 2) {
+        --si-card-bg: #f2f9f2;
+        --si-card-border: #b8e2bd;
+        --si-card-accent: #2b9b4c;
+        --si-card-title: #1f6f37;
+      }
+
+      .card:nth-of-type(6n + 3) {
+        --si-card-bg: #fff6ec;
+        --si-card-border: #ffd7ae;
+        --si-card-accent: #d67a1c;
+        --si-card-title: #8f4c0f;
+      }
+
+      .card:nth-of-type(6n + 4) {
+        --si-card-bg: #f8f0ff;
+        --si-card-border: #dbbafc;
+        --si-card-accent: #8a49d7;
+        --si-card-title: #5f2aa1;
+      }
+
+      .card:nth-of-type(6n + 5) {
+        --si-card-bg: #eefcff;
+        --si-card-border: #b7e8f0;
+        --si-card-accent: #1f8ea4;
+        --si-card-title: #136375;
+      }
+
+      .card:nth-of-type(6n + 6) {
+        --si-card-bg: #fff2f6;
+        --si-card-border: #f7c1d5;
+        --si-card-accent: #c73775;
+        --si-card-title: #8a2350;
+      }
+
+      html[data-bs-theme="dark"] .card {
+        --si-card-bg: #1d2634;
+        --si-card-border: #3b4f6e;
+        --si-card-title: #f3f7ff;
+      }
+
+      html[data-bs-theme="dark"] .badge {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      }
+
+      .navbar .nav-link {
+        border-top: 3px solid transparent;
+        border-radius: 0 !important;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .navbar .nav-link:hover,
+      .navbar .nav-link:focus,
+      .navbar .nav-link.active,
+      .navbar .nav-link[aria-expanded="true"] {
+        border-top-color: var(--si-navbar-tab-color);
+        background-color: rgba(47, 111, 237, 0.1);
+      }
+
+      html[data-bs-theme="dark"] .navbar .nav-link:hover,
+      html[data-bs-theme="dark"] .navbar .nav-link:focus,
+      html[data-bs-theme="dark"] .navbar .nav-link.active,
+      html[data-bs-theme="dark"] .navbar .nav-link[aria-expanded="true"] {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+    </style>
   </head>
   <body>
     <a href="#content" class="visually-hidden skip-link">Skip to main content</a>
