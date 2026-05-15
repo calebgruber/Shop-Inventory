@@ -130,9 +130,9 @@
         color: var(--si-card-text);
       }
 
-      /* Dark mode title chip: 25% accent bg, 100% accent text */
+      /* Dark mode title chip: 15% accent bg, 100% accent text */
       html[data-bs-theme="dark"] .card .card-title {
-        background-color: color-mix(in srgb, var(--si-card-accent) 25%, transparent);
+        background-color: color-mix(in srgb, var(--si-card-accent) 15%, transparent);
         color: var(--si-card-accent);
       }
 
