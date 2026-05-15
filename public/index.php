@@ -43,57 +43,87 @@
     <!-- END CUSTOM FONT -->
     <!-- Source: calebgruber/custom-tabler branch copilot/remove-other-navbars (built locally for this repo) -->
     <style>
+      /* ===== PAGE LOADER ===== */
+      #si-page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--tblr-bg-surface, #fff);
+        transition: opacity 0.35s ease;
+      }
+      #si-page-loader.si-loader-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .si-loader-ring {
+        width: 3rem;
+        height: 3rem;
+        border: 3px solid var(--tblr-border-color, #dee2e6);
+        border-top-color: var(--tblr-primary, #066fd1);
+        border-radius: 50%;
+        animation: si-spin 0.7s linear infinite;
+      }
+      @keyframes si-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* ===== PAGE FADE-IN ANIMATION ===== */
+      @keyframes si-fadein {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .si-animate {
+        opacity: 0;
+        animation: si-fadein 0.45s ease forwards;
+      }
+
       /* ===== BORDER RADIUS ===== */
       .btn, .btn-close { border-radius: 1px !important; }
       .card, .alert, .badge, .avatar, .tag, .steps .step-item { border-radius: 2px !important; }
       .form-control, .form-select, .form-check-input, .input-group-text { border-radius: 1px !important; }
 
-      /* ===== PAGE BACKGROUND — light mode only, page wrapper only ===== */
+      /* ===== PAGE BACKGROUND — light mode only ===== */
       html:not([data-bs-theme="dark"]) body,
       html:not([data-bs-theme="dark"]) .page {
         background-color: #f0f6ff;
       }
 
-      /* ===== CARDS — accent-driven theming ===== */
-      /* Default accent (overridden per-card by JS) */
+      /* ===== CARDS — left border accent only; normal card bg/borders unchanged ===== */
       .card {
         --si-card-accent: #2563eb;
         --si-card-text: #fff;
-      }
-
-      /* Base border: all sides thin, left 5px — all use accent */
-      .card {
-        border: 1px solid var(--si-card-accent) !important;
         border-left: 5px solid var(--si-card-accent) !important;
       }
 
-      /* Light mode: card background = full accent, text = contrasting black/white */
-      html:not([data-bs-theme="dark"]) .card {
-        background-color: var(--si-card-accent) !important;
-        color: var(--si-card-text) !important;
-      }
-      html:not([data-bs-theme="dark"]) .card .card-title {
-        color: var(--si-card-text) !important;
-      }
-      html:not([data-bs-theme="dark"]) .card .card-body,
-      html:not([data-bs-theme="dark"]) .card .card-header,
-      html:not([data-bs-theme="dark"]) .card .card-footer,
-      html:not([data-bs-theme="dark"]) .card .card-stamp,
-      html:not([data-bs-theme="dark"]) .card .card-img-overlay {
-        background-color: transparent !important;
-        color: inherit !important;
+      /* Card title icon "chip" — the span.card-title-icon wrapping the icon SVG */
+      .card-title-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 4px;
+        margin-inline-end: 0.5rem;
+        flex-shrink: 0;
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
 
-      /* Dark mode: card background = 25% accent, title = 100% accent */
-      html[data-bs-theme="dark"] .card {
-        background-color: color-mix(in srgb, var(--si-card-accent) 25%, transparent) !important;
+      /* Light mode chip: 100% accent bg, contrasting text */
+      html:not([data-bs-theme="dark"]) .card .card-title-icon {
+        background-color: var(--si-card-accent);
+        color: var(--si-card-text);
       }
-      html[data-bs-theme="dark"] .card .card-title {
-        color: var(--si-card-accent) !important;
+
+      /* Dark mode chip: 25% accent bg, 100% accent text */
+      html[data-bs-theme="dark"] .card .card-title-icon {
+        background-color: color-mix(in srgb, var(--si-card-accent) 25%, transparent);
+        color: var(--si-card-accent);
       }
 
       /* ===== BADGES — dark mode: text = main color, bg = 25% of main color ===== */
-      /* Uses Tabler's --tblr-bg-opacity trick: changing the variable recalculates color-mix() */
       html[data-bs-theme="dark"] .badge.bg-primary   { --tblr-bg-opacity: 0.25; color: var(--tblr-primary)   !important; }
       html[data-bs-theme="dark"] .badge.bg-secondary { --tblr-bg-opacity: 0.25; color: var(--tblr-secondary) !important; }
       html[data-bs-theme="dark"] .badge.bg-success   { --tblr-bg-opacity: 0.25; color: var(--tblr-success)   !important; }
@@ -114,36 +144,43 @@
       html[data-bs-theme="dark"] .badge.bg-teal      { --tblr-bg-opacity: 0.25; color: var(--tblr-teal)      !important; }
       html[data-bs-theme="dark"] .badge.bg-cyan      { --tblr-bg-opacity: 0.25; color: var(--tblr-cyan)      !important; }
 
-      /* ===== NAVBAR AS TABS (color indicator at top, 2px radius, zero gap) ===== */
-      /* Remove Tabler's default bottom-border active indicator */
-      .navbar-expand-md .nav-item.active:after,
-      .navbar-expand-md .nav-item.show:after {
+      /* ===== NAVBAR AS TABS — bottom-aligned, 2px top-corner radius, no gap ===== */
+      /* Suppress Tabler's ::after bottom-line active indicator */
+      .navbar-expand-md .nav-item.active::after,
+      .navbar-expand-md .nav-item.show::after {
         display: none !important;
       }
 
-      /* Zero-gap tabs — override any margin/gap between items */
+      /* Stretch collapse so it fills the navbar height, then push its children down */
+      .navbar .navbar-collapse {
+        align-self: stretch !important;
+        display: flex !important;
+        align-items: flex-end !important;
+      }
+
+      /* Zero-gap tabs */
       .navbar .navbar-nav {
         gap: 0 !important;
+        align-self: flex-end;
       }
       .navbar .navbar-nav .nav-item {
         margin: 0 !important;
       }
-      /* Collapse adjacent tab borders like .card-tabs does */
       .navbar .navbar-nav .nav-item + .nav-item .nav-link {
         margin-inline-start: -1px;
       }
 
-      /* Tab-style nav-link: top border as indicator, 2px top-corner radius */
+      /* Tab shape: top indicator border, 2px top-corner radius, no bottom padding gap */
       .navbar .navbar-nav .nav-link {
         border-top: 3px solid transparent !important;
         border-radius: 2px 2px 0 0 !important;
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0 !important;
         margin: 0 !important;
         transition: border-color 0.15s ease, background-color 0.15s ease;
       }
 
-      /* Active / open / hover states: accent at top */
+      /* Active / open / hover */
       .navbar .navbar-nav .nav-link:hover,
       .navbar .navbar-nav .nav-link:focus,
       .navbar .navbar-nav .nav-link.active,
@@ -153,9 +190,31 @@
         border-top-color: var(--tblr-primary) !important;
         background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
       }
+
+      /* ===== PROGRESS BARS — static diagonal stripes (no animation) ===== */
+      .progress-bar {
+        background-image: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.2) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0.2) 75%,
+          transparent 75%,
+          transparent
+        ) !important;
+        background-size: 1rem 1rem !important;
+        /* override any animation that may be inherited */
+        animation: none !important;
+      }
     </style>
   </head>
   <body>
+    <!-- BEGIN PAGE LOADER -->
+    <div id="si-page-loader" aria-hidden="true">
+      <div class="si-loader-ring"></div>
+    </div>
+    <!-- END PAGE LOADER -->
     <a href="#content" class="visually-hidden skip-link">Skip to main content</a>
     <!-- BEGIN GLOBAL THEME SCRIPT -->
     <script src="./dist/js/tabler-theme.min.js?1778865600"></script>
@@ -6572,11 +6631,62 @@ This textarea grows automatically when you type more content into it.</textarea
       });
     </script>
     <!-- END PAGE SCRIPTS -->
-    <!-- BEGIN CARD ACCENT RANDOMIZATION -->
+    <!-- BEGIN SI ENHANCEMENTS: loader, animations, card accents -->
     <script>
       (function () {
-        /* Curated palette: [accent hex, readable text on that bg] */
-        /* Text is pre-computed: white for L < 0.35, black for L >= 0.35 */
+        /* ---- PAGE LOADER ---- */
+        var loader = document.getElementById('si-page-loader');
+        function hideLoader() {
+          if (!loader) return;
+          loader.classList.add('si-loader-hidden');
+          setTimeout(function () { loader.style.display = 'none'; }, 400);
+        }
+        if (document.readyState === 'complete') {
+          setTimeout(hideLoader, 200);
+        } else {
+          window.addEventListener('load', function () { setTimeout(hideLoader, 200); });
+        }
+
+        /* ---- SCROLL-TRIGGERED FADE-IN ---- */
+        /* Stagger cards in each row; animate other key sections */
+        var delay = 0;
+        document.querySelectorAll('.row').forEach(function (row) {
+          var cards = row.querySelectorAll('.card');
+          cards.forEach(function (card, i) {
+            card.classList.add('si-animate');
+            card.style.animationDelay = (i * 0.07) + 's';
+          });
+        });
+
+        /* Animate first-level page sections (page-header, alerts, tables, etc.) */
+        var sectionSel = '.page-header, .alert, table.table, .list-group, .steps';
+        document.querySelectorAll(sectionSel).forEach(function (el, i) {
+          el.classList.add('si-animate');
+          el.style.animationDelay = (i * 0.05) + 's';
+        });
+
+        /* Use IntersectionObserver to only play animation when in viewport */
+        if ('IntersectionObserver' in window) {
+          /* Reset opacity to 0 until visible */
+          document.querySelectorAll('.si-animate').forEach(function (el) {
+            el.style.opacity = '0';
+            el.style.animationPlayState = 'paused';
+          });
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.07 });
+          document.querySelectorAll('.si-animate').forEach(function (el) {
+            io.observe(el);
+          });
+        }
+
+        /* ---- CARD ACCENT RANDOMIZATION ---- */
+        /* Palette: [accent hex, contrasting text color] */
         var palette = [
           ['#2563eb', '#fff'],  /* blue */
           ['#1d4ed8', '#fff'],  /* indigo-blue */
@@ -6593,14 +6703,13 @@ This textarea grows automatically when you type more content into it.</textarea
           ['#dc2626', '#fff'],  /* red */
           ['#b45309', '#fff'],  /* amber dark */
           ['#c2410c', '#fff'],  /* orange */
-          ['#d97706', '#000'],  /* amber — black text for contrast */
-          ['#65a30d', '#000'],  /* lime — black text */
+          ['#d97706', '#000'],  /* amber — needs black text */
+          ['#65a30d', '#000'],  /* lime — needs black text */
           ['#0e7490', '#fff'],  /* cyan dark */
           ['#1e40af', '#fff'],  /* blue dark */
           ['#7e22ce', '#fff'],  /* purple dark */
         ];
 
-        /* Assign a random accent to every .card on the page */
         document.querySelectorAll('.card').forEach(function (card) {
           var entry = palette[Math.floor(Math.random() * palette.length)];
           card.style.setProperty('--si-card-accent', entry[0]);
@@ -6608,6 +6717,6 @@ This textarea grows automatically when you type more content into it.</textarea
         });
       })();
     </script>
-    <!-- END CARD ACCENT RANDOMIZATION -->
+    <!-- END SI ENHANCEMENTS -->
   </body>
 </html>
