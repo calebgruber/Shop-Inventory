@@ -266,7 +266,7 @@
       #navbar-menu .navbar-nav .nav-link {
         border: 1px solid transparent !important;
         border-bottom: 0 !important;
-        border-radius: 0.5rem 0.5rem 0 0 !important;
+        border-radius: 0 !important;
         margin: 0 0 -1px 0 !important;
         padding-top: 0.6rem !important;
         padding-bottom: 0.6rem !important;
@@ -367,7 +367,7 @@
             ></a>
           </div>
           <!-- END NAVBAR LOGO -->
-          <div class="navbar-nav flex-row order-md-last si-top-utility">
+          <div class="navbar-nav flex-row si-top-utility">
             <div class="nav-item si-live-datetime" aria-live="polite">
               <span class="si-live-time">
                 <span class="si-live-hours-minutes" id="si-live-hours-minutes">--:--</span><span class="si-live-seconds" id="si-live-seconds">:--</span>
