@@ -168,7 +168,8 @@
       .page > .navbar {
         box-shadow: none !important;
         background: var(--tblr-bg-surface) !important;
-        border-bottom: 1px solid var(--tblr-border-color);
+        border-bottom: 0 !important;
+        margin-bottom: 0 !important;
       }
       .si-site-header {
         padding-top: 8px !important;
@@ -262,6 +263,8 @@
       }
       #navbar-menu .navbar-nav .nav-item {
         margin: 0 !important;
+        display: flex;
+        justify-content: flex-end;
       }
 
       /* True tab shape */
