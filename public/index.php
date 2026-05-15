@@ -170,6 +170,10 @@
         background: var(--tblr-bg-surface) !important;
         border-bottom: 1px solid var(--tblr-border-color);
       }
+      .si-site-header {
+        padding-top: 8px !important;
+        padding-bottom: 0 !important;
+      }
 
       .si-site-header .container-xl {
         display: flex;
@@ -263,7 +267,7 @@
       /* True tab shape */
       #navbar-menu .navbar-nav .nav-link {
         border: 0 !important;
-        border-top: 1px solid transparent !important;
+        border-top: 4px solid transparent !important;
         border-bottom: 0 !important;
         border-radius: 0 !important;
         margin: 0 !important;
@@ -276,6 +280,7 @@
       #navbar-menu .navbar-nav .nav-link:hover,
       #navbar-menu .navbar-nav .nav-link:focus {
         background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
+        border-top-color: var(--tblr-primary) !important;
       }
 
       #navbar-menu .navbar-nav .nav-link.active,
