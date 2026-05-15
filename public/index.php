@@ -106,7 +106,7 @@
         width: fit-content;
         margin-bottom: 0 !important;
         padding: 0.25rem 0.5rem;
-        border-radius: 4px;
+        border-radius: 0 9999px 9999px 0;
         line-height: 1.25;
         transition: background-color 0.2s ease, color 0.2s ease;
       }
@@ -167,13 +167,55 @@
       /* Make top header feel like a tab container, not a navbar bar */
       .page > .navbar {
         box-shadow: none !important;
-        background: transparent !important;
+        background: var(--tblr-bg-surface) !important;
+        border-bottom: 1px solid var(--tblr-border-color);
+      }
+
+      .si-site-header .container-xl {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 0.5rem;
+      }
+
+      .si-site-header .navbar-brand {
+        order: 1;
+      }
+
+      .si-live-datetime {
+        order: 2;
+        flex: 1 1 auto;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.9rem;
+        color: var(--tblr-secondary);
+      }
+
+      .si-top-utility {
+        order: 3;
+        margin-left: auto;
+      }
+
+      .si-top-utility > .d-none.d-md-flex {
+        display: none !important;
+      }
+
+      .si-site-header .navbar-toggler {
+        order: 4;
+      }
+
+      #navbar-menu {
+        order: 5;
+        flex-basis: 100%;
+        width: 100%;
+        padding-top: 0.25rem;
       }
 
       #navbar-menu .navbar-nav {
         gap: 0 !important;
         align-self: flex-end;
         border-bottom: 1px solid var(--tblr-border-color);
+        width: 100%;
       }
       #navbar-menu .navbar-nav .nav-item {
         margin: 0 !important;
@@ -207,6 +249,18 @@
         color: var(--tblr-body-color) !important;
       }
 
+      @media (max-width: 767.98px) {
+        .si-live-datetime {
+          order: 4;
+          width: 100%;
+          text-align: left;
+        }
+        .si-site-header .navbar-toggler {
+          order: 3;
+          margin-left: auto;
+        }
+      }
+
       /* ===== PROGRESS BARS — static diagonal stripes (no animation) ===== */
       .progress-bar {
         background-image: linear-gradient(
@@ -237,7 +291,7 @@
     <!-- END GLOBAL THEME SCRIPT -->
     <div class="page">
       <!-- BEGIN NAVBAR  -->
-      <header class="navbar navbar-expand-md d-print-none">
+      <header class="navbar navbar-expand-md d-print-none si-site-header">
         <div class="container-xl">
           <!-- BEGIN NAVBAR TOGGLER -->
           <button
@@ -270,7 +324,10 @@
             ></a>
           </div>
           <!-- END NAVBAR LOGO -->
-          <div class="navbar-nav flex-row order-md-last">
+          <div class="si-live-datetime" aria-live="polite">
+            <span id="si-live-datetime">--</span>
+          </div>
+          <div class="navbar-nav flex-row order-md-last si-top-utility">
             <div class="d-none d-md-flex me-3">
               <!-- BEGIN THEME TOGGLE -->
               <div class="nav-item">
@@ -1049,7 +1106,7 @@
               <!-- END LANGUAGE SELECTOR -->
             </div>
             <!-- BEGIN USER MENU -->
-            <div class="nav-item dropdown">
+            <div class="nav-item dropdown si-user-menu">
               <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
                 <span class="avatar avatar-sm" style="background-image: url(./static/avatars/000m.jpg)"> </span>
                 <div class="d-none d-xl-block ps-2">
@@ -5631,50 +5688,9 @@ This textarea grows automatically when you type more content into it.</textarea
         <!--  BEGIN FOOTER  -->
         <footer class="footer footer-transparent d-print-none">
           <div class="container-xl">
-            <div class="row text-center align-items-center flex-row-reverse">
-              <div class="col-lg-auto ms-lg-auto">
-                <nav aria-label="Footer">
-                  <ul class="list-inline list-inline-dots mb-0">
-                    <li class="list-inline-item"><a href="https://docs.tabler.io" target="_blank" class="link-secondary" rel="noopener">Documentation</a></li>
-                    <li class="list-inline-item"><a href="./license.html" class="link-secondary">License</a></li>
-                    <li class="list-inline-item">
-                      <a href="https://github.com/tabler/tabler" target="_blank" class="link-secondary" rel="noopener">Source code</a>
-                    </li>
-                    <li class="list-inline-item">
-                      <a href="https://github.com/sponsors/codecalm" target="_blank" class="link-secondary" rel="noopener">
-                        <!-- Download SVG icon from http://tabler.io/icons/icon/heart -->
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                          focusable="false"
-                          class="icon text-pink icon-inline icon-4"
-                        >
-                          <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
-                        </svg>
-                        Sponsor
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                <ul class="list-inline list-inline-dots mb-0">
-                  <li class="list-inline-item">
-                    Copyright &copy; 2026
-                    <a href="." class="link-secondary">Tabler</a>. All rights reserved.
-                  </li>
-                  <li class="list-inline-item">
-                    <a href="./changelog.html" class="link-secondary" rel="noopener"> v1.4.0 </a>
-                  </li>
-                </ul>
+            <div class="row text-center align-items-center">
+              <div class="col-12">
+                <span class="text-secondary">Made with ❤️ by Caleb Gruber</span>
               </div>
             </div>
           </div>
@@ -6661,6 +6677,24 @@ This textarea grows automatically when you type more content into it.</textarea
           setTimeout(hideLoader, 200);
         } else {
           window.addEventListener('load', function () { setTimeout(hideLoader, 200); });
+        }
+
+        /* ---- LIVE DATETIME ---- */
+        var liveClock = document.getElementById('si-live-datetime');
+        if (liveClock) {
+          function updateLiveClock() {
+            liveClock.textContent = new Date().toLocaleString(undefined, {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            });
+          }
+          updateLiveClock();
+          setInterval(updateLiveClock, 1000);
         }
 
         /* ---- SCROLL-TRIGGERED FADE-IN ---- */
