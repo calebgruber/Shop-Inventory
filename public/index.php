@@ -98,27 +98,40 @@
         border-left: 5px solid var(--si-card-accent) !important;
       }
 
-      /* Card title icon "chip" — the span.card-title-icon wrapping the icon SVG */
+      /* Card title chip (entire title element) */
+      .card .card-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: fit-content;
+        margin-bottom: 0 !important;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        line-height: 1.25;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      /* Keep icon layout, but let color come from .card-title */
       .card-title-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 1.75rem;
         height: 1.75rem;
-        border-radius: 4px;
-        margin-inline-end: 0.5rem;
+        border-radius: 3px;
+        margin-inline-end: 0;
         flex-shrink: 0;
-        transition: background-color 0.2s ease, color 0.2s ease;
+        color: inherit;
       }
 
-      /* Light mode chip: 100% accent bg, contrasting text */
-      html:not([data-bs-theme="dark"]) .card .card-title-icon {
+      /* Light mode title chip: 100% accent bg, contrasting text */
+      html:not([data-bs-theme="dark"]) .card .card-title {
         background-color: var(--si-card-accent);
         color: var(--si-card-text);
       }
 
-      /* Dark mode chip: 25% accent bg, 100% accent text */
-      html[data-bs-theme="dark"] .card .card-title-icon {
+      /* Dark mode title chip: 25% accent bg, 100% accent text */
+      html[data-bs-theme="dark"] .card .card-title {
         background-color: color-mix(in srgb, var(--si-card-accent) 25%, transparent);
         color: var(--si-card-accent);
       }
@@ -144,51 +157,54 @@
       html[data-bs-theme="dark"] .badge.bg-teal      { --tblr-bg-opacity: 0.25; color: var(--tblr-teal)      !important; }
       html[data-bs-theme="dark"] .badge.bg-cyan      { --tblr-bg-opacity: 0.25; color: var(--tblr-cyan)      !important; }
 
-      /* ===== NAVBAR AS TABS — bottom-aligned, 2px top-corner radius, no gap ===== */
-      /* Suppress Tabler's ::after bottom-line active indicator */
-      .navbar-expand-md .nav-item.active::after,
-      .navbar-expand-md .nav-item.show::after {
+      /* ===== PRIMARY NAV AS CONNECTED TABS ===== */
+      /* Suppress Tabler navbar underline indicator */
+      .navbar-expand-md #navbar-menu .nav-item.active::after,
+      .navbar-expand-md #navbar-menu .nav-item.show::after {
         display: none !important;
       }
 
-      /* Stretch collapse so it fills the navbar height, then push its children down */
-      .navbar .navbar-collapse {
-        align-self: stretch !important;
-        display: flex !important;
-        align-items: flex-end !important;
+      /* Make top header feel like a tab container, not a navbar bar */
+      .page > .navbar {
+        box-shadow: none !important;
+        background: transparent !important;
       }
 
-      /* Zero-gap tabs */
-      .navbar .navbar-nav {
+      #navbar-menu .navbar-nav {
         gap: 0 !important;
         align-self: flex-end;
+        border-bottom: 1px solid var(--tblr-border-color);
       }
-      .navbar .navbar-nav .nav-item {
+      #navbar-menu .navbar-nav .nav-item {
         margin: 0 !important;
       }
-      .navbar .navbar-nav .nav-item + .nav-item .nav-link {
-        margin-inline-start: -1px;
+      #navbar-menu .navbar-nav .nav-item + .nav-item .nav-link {
+        margin-inline-start: -1px !important;
       }
 
-      /* Tab shape: top indicator border, 2px top-corner radius, no bottom padding gap */
-      .navbar .navbar-nav .nav-link {
-        border-top: 3px solid transparent !important;
-        border-radius: 2px 2px 0 0 !important;
-        padding-top: 0.5rem !important;
-        padding-bottom: 0 !important;
-        margin: 0 !important;
-        transition: border-color 0.15s ease, background-color 0.15s ease;
+      /* True tab shape */
+      #navbar-menu .navbar-nav .nav-link {
+        border: 1px solid transparent !important;
+        border-radius: 4px 4px 0 0 !important;
+        margin: 0 0 -1px 0 !important;
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.6rem !important;
+        background-color: color-mix(in srgb, var(--tblr-bg-surface) 94%, transparent);
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
       }
 
-      /* Active / open / hover */
-      .navbar .navbar-nav .nav-link:hover,
-      .navbar .navbar-nav .nav-link:focus,
-      .navbar .navbar-nav .nav-link.active,
-      .navbar .navbar-nav .nav-item.active > .nav-link,
-      .navbar .navbar-nav .nav-link[aria-expanded="true"],
-      .navbar .navbar-nav .nav-item.show > .nav-link {
-        border-top-color: var(--tblr-primary) !important;
-        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
+      #navbar-menu .navbar-nav .nav-link:hover,
+      #navbar-menu .navbar-nav .nav-link:focus {
+        background-color: color-mix(in srgb, var(--tblr-bg-surface-tertiary) 75%, transparent) !important;
+      }
+
+      #navbar-menu .navbar-nav .nav-link.active,
+      #navbar-menu .navbar-nav .nav-item.active > .nav-link,
+      #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
+      #navbar-menu .navbar-nav .nav-item.show > .nav-link {
+        background-color: var(--tblr-bg-surface) !important;
+        border-color: var(--tblr-border-color) var(--tblr-border-color) var(--tblr-bg-surface) !important;
+        color: var(--tblr-body-color) !important;
       }
 
       /* ===== PROGRESS BARS — static diagonal stripes (no animation) ===== */
