@@ -245,48 +245,47 @@
         order: 4;
         flex-basis: 100%;
         width: 100%;
-        padding-top: 0.25rem;
+        padding-top: 0;
+        margin-top: 0.25rem;
+        border-top: 1px solid var(--tblr-border-color);
       }
 
       #navbar-menu .navbar-nav {
         gap: 0 !important;
-        align-self: flex-end;
-        border-bottom: 1px solid var(--tblr-border-color);
+        align-self: stretch;
         width: 100%;
-        padding-top: 0.25rem;
+        padding-top: 0;
       }
       #navbar-menu .navbar-nav .nav-item {
         margin: 0 !important;
       }
-      #navbar-menu .navbar-nav .nav-item + .nav-item .nav-link {
-        margin-inline-start: -1px !important;
-      }
 
       /* True tab shape */
       #navbar-menu .navbar-nav .nav-link {
-        border: 1px solid transparent !important;
+        border: 0 !important;
+        border-top: 1px solid transparent !important;
         border-bottom: 0 !important;
         border-radius: 0 !important;
-        margin: 0 0 -1px 0 !important;
+        margin: 0 !important;
         padding-top: 0.6rem !important;
         padding-bottom: 0.6rem !important;
-        background-color: color-mix(in srgb, var(--tblr-bg-surface) 94%, transparent);
+        background-color: transparent;
         transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
       }
 
       #navbar-menu .navbar-nav .nav-link:hover,
       #navbar-menu .navbar-nav .nav-link:focus {
-        background-color: color-mix(in srgb, var(--tblr-bg-surface-tertiary) 75%, transparent) !important;
+        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
       }
 
       #navbar-menu .navbar-nav .nav-link.active,
       #navbar-menu .navbar-nav .nav-item.active > .nav-link,
       #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
       #navbar-menu .navbar-nav .nav-item.show > .nav-link {
-        background-color: var(--tblr-bg-surface) !important;
-        border-color: var(--tblr-border-color) var(--tblr-border-color) var(--tblr-bg-surface) !important;
+        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
+        border-color: var(--tblr-primary) transparent transparent !important;
         color: var(--tblr-body-color) !important;
-        box-shadow: inset 0 3px 0 var(--tblr-primary);
+        box-shadow: none;
       }
 
       @media (max-width: 767.98px) {
