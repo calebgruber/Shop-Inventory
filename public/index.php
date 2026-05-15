@@ -43,127 +43,115 @@
     <!-- END CUSTOM FONT -->
     <!-- Source: calebgruber/custom-tabler branch copilot/remove-other-navbars (built locally for this repo) -->
     <style>
-      :root {
-        --si-page-light-bg: #f3f8ff;
-        --si-navbar-tab-color: #2f6fed;
+      /* ===== BORDER RADIUS ===== */
+      .btn, .btn-close { border-radius: 1px !important; }
+      .card, .alert, .badge, .avatar, .tag, .steps .step-item { border-radius: 2px !important; }
+      .form-control, .form-select, .form-check-input, .input-group-text { border-radius: 1px !important; }
+
+      /* ===== PAGE BACKGROUND — light mode only, page wrapper only ===== */
+      html:not([data-bs-theme="dark"]) body,
+      html:not([data-bs-theme="dark"]) .page {
+        background-color: #f0f6ff;
       }
 
-      html[data-bs-theme="light"] body,
-      html:not([data-bs-theme]) body,
-      html[data-bs-theme="light"] .page,
-      html:not([data-bs-theme]) .page {
-        background-color: var(--si-page-light-bg);
-      }
-
-      .btn,
-      .btn-close {
-        border-radius: 1px !important;
-      }
-
-      .card,
-      .alert,
-      .badge,
-      .avatar,
-      .tag,
-      .steps .step-item {
-        border-radius: 2px !important;
-      }
-
-      .form-control,
-      .form-select,
-      .form-check-input,
-      .input-group-text {
-        border-radius: 1px !important;
-      }
-
+      /* ===== CARDS — accent-driven theming ===== */
+      /* Default accent (overridden per-card by JS) */
       .card {
-        --si-card-bg: #f8fbff;
-        --si-card-border: #bdd3f3;
-        --si-card-accent: #2f6fed;
-        --si-card-title: #194d9b;
-        background-color: var(--si-card-bg);
-        border: 1px solid var(--si-card-border);
-        border-left: 5px solid var(--si-card-accent);
+        --si-card-accent: #2563eb;
+        --si-card-text: #fff;
       }
 
-      .card .card-title {
-        color: var(--si-card-title) !important;
+      /* Base border: all sides thin, left 5px — all use accent */
+      .card {
+        border: 1px solid var(--si-card-accent) !important;
+        border-left: 5px solid var(--si-card-accent) !important;
       }
 
-      .card:nth-of-type(6n + 1) {
-        --si-card-bg: #eef6ff;
-        --si-card-border: #b6d5ff;
-        --si-card-accent: #2f6fed;
-        --si-card-title: #164887;
+      /* Light mode: card background = full accent, text = contrasting black/white */
+      html:not([data-bs-theme="dark"]) .card {
+        background-color: var(--si-card-accent) !important;
+        color: var(--si-card-text) !important;
+      }
+      html:not([data-bs-theme="dark"]) .card .card-title {
+        color: var(--si-card-text) !important;
+      }
+      html:not([data-bs-theme="dark"]) .card .card-body,
+      html:not([data-bs-theme="dark"]) .card .card-header,
+      html:not([data-bs-theme="dark"]) .card .card-footer,
+      html:not([data-bs-theme="dark"]) .card .card-stamp,
+      html:not([data-bs-theme="dark"]) .card .card-img-overlay {
+        background-color: transparent !important;
+        color: inherit !important;
       }
 
-      .card:nth-of-type(6n + 2) {
-        --si-card-bg: #f2f9f2;
-        --si-card-border: #b8e2bd;
-        --si-card-accent: #2b9b4c;
-        --si-card-title: #1f6f37;
-      }
-
-      .card:nth-of-type(6n + 3) {
-        --si-card-bg: #fff6ec;
-        --si-card-border: #ffd7ae;
-        --si-card-accent: #d67a1c;
-        --si-card-title: #8f4c0f;
-      }
-
-      .card:nth-of-type(6n + 4) {
-        --si-card-bg: #f8f0ff;
-        --si-card-border: #dbbafc;
-        --si-card-accent: #8a49d7;
-        --si-card-title: #5f2aa1;
-      }
-
-      .card:nth-of-type(6n + 5) {
-        --si-card-bg: #eefcff;
-        --si-card-border: #b7e8f0;
-        --si-card-accent: #1f8ea4;
-        --si-card-title: #136375;
-      }
-
-      .card:nth-of-type(6n + 6) {
-        --si-card-bg: #fff2f6;
-        --si-card-border: #f7c1d5;
-        --si-card-accent: #c73775;
-        --si-card-title: #8a2350;
-      }
-
+      /* Dark mode: card background = 25% accent, title = 100% accent */
       html[data-bs-theme="dark"] .card {
-        --si-card-bg: #1d2634;
-        --si-card-border: #3b4f6e;
-        --si-card-title: #f3f7ff;
+        background-color: color-mix(in srgb, var(--si-card-accent) 25%, transparent) !important;
+      }
+      html[data-bs-theme="dark"] .card .card-title {
+        color: var(--si-card-accent) !important;
       }
 
-      html[data-bs-theme="dark"] .badge {
-        background-color: rgba(255, 255, 255, 0.2) !important;
-        color: #fff !important;
-        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      /* ===== BADGES — dark mode: text = main color, bg = 25% of main color ===== */
+      /* Uses Tabler's --tblr-bg-opacity trick: changing the variable recalculates color-mix() */
+      html[data-bs-theme="dark"] .badge.bg-primary   { --tblr-bg-opacity: 0.25; color: var(--tblr-primary)   !important; }
+      html[data-bs-theme="dark"] .badge.bg-secondary { --tblr-bg-opacity: 0.25; color: var(--tblr-secondary) !important; }
+      html[data-bs-theme="dark"] .badge.bg-success   { --tblr-bg-opacity: 0.25; color: var(--tblr-success)   !important; }
+      html[data-bs-theme="dark"] .badge.bg-info      { --tblr-bg-opacity: 0.25; color: var(--tblr-info)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-warning   { --tblr-bg-opacity: 0.25; color: var(--tblr-warning)   !important; }
+      html[data-bs-theme="dark"] .badge.bg-danger    { --tblr-bg-opacity: 0.25; color: var(--tblr-danger)    !important; }
+      html[data-bs-theme="dark"] .badge.bg-dark      { --tblr-bg-opacity: 0.25; color: var(--tblr-dark)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-muted     { --tblr-bg-opacity: 0.25; color: var(--tblr-muted)     !important; }
+      html[data-bs-theme="dark"] .badge.bg-blue      { --tblr-bg-opacity: 0.25; color: var(--tblr-blue)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-azure     { --tblr-bg-opacity: 0.25; color: var(--tblr-azure)     !important; }
+      html[data-bs-theme="dark"] .badge.bg-indigo    { --tblr-bg-opacity: 0.25; color: var(--tblr-indigo)    !important; }
+      html[data-bs-theme="dark"] .badge.bg-purple    { --tblr-bg-opacity: 0.25; color: var(--tblr-purple)    !important; }
+      html[data-bs-theme="dark"] .badge.bg-pink      { --tblr-bg-opacity: 0.25; color: var(--tblr-pink)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-red       { --tblr-bg-opacity: 0.25; color: var(--tblr-red)       !important; }
+      html[data-bs-theme="dark"] .badge.bg-orange    { --tblr-bg-opacity: 0.25; color: var(--tblr-orange)    !important; }
+      html[data-bs-theme="dark"] .badge.bg-lime      { --tblr-bg-opacity: 0.25; color: var(--tblr-lime)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-green     { --tblr-bg-opacity: 0.25; color: var(--tblr-green)     !important; }
+      html[data-bs-theme="dark"] .badge.bg-teal      { --tblr-bg-opacity: 0.25; color: var(--tblr-teal)      !important; }
+      html[data-bs-theme="dark"] .badge.bg-cyan      { --tblr-bg-opacity: 0.25; color: var(--tblr-cyan)      !important; }
+
+      /* ===== NAVBAR AS TABS (color indicator at top, 2px radius, zero gap) ===== */
+      /* Remove Tabler's default bottom-border active indicator */
+      .navbar-expand-md .nav-item.active:after,
+      .navbar-expand-md .nav-item.show:after {
+        display: none !important;
       }
 
-      .navbar .nav-link {
-        border-top: 3px solid transparent;
-        border-radius: 0 !important;
-        padding-top: 0.75rem;
-        padding-bottom: 0.75rem;
+      /* Zero-gap tabs — override any margin/gap between items */
+      .navbar .navbar-nav {
+        gap: 0 !important;
+      }
+      .navbar .navbar-nav .nav-item {
+        margin: 0 !important;
+      }
+      /* Collapse adjacent tab borders like .card-tabs does */
+      .navbar .navbar-nav .nav-item + .nav-item .nav-link {
+        margin-inline-start: -1px;
       }
 
-      .navbar .nav-link:hover,
-      .navbar .nav-link:focus,
-      .navbar .nav-link.active,
-      .navbar .nav-link[aria-expanded="true"] {
-        border-top-color: var(--si-navbar-tab-color);
-        background-color: rgba(47, 111, 237, 0.1);
+      /* Tab-style nav-link: top border as indicator, 2px top-corner radius */
+      .navbar .navbar-nav .nav-link {
+        border-top: 3px solid transparent !important;
+        border-radius: 2px 2px 0 0 !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        margin: 0 !important;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
       }
 
-      html[data-bs-theme="dark"] .navbar .nav-link:hover,
-      html[data-bs-theme="dark"] .navbar .nav-link:focus,
-      html[data-bs-theme="dark"] .navbar .nav-link.active,
-      html[data-bs-theme="dark"] .navbar .nav-link[aria-expanded="true"] {
-        background-color: rgba(255, 255, 255, 0.08);
+      /* Active / open / hover states: accent at top */
+      .navbar .navbar-nav .nav-link:hover,
+      .navbar .navbar-nav .nav-link:focus,
+      .navbar .navbar-nav .nav-link.active,
+      .navbar .navbar-nav .nav-item.active > .nav-link,
+      .navbar .navbar-nav .nav-link[aria-expanded="true"],
+      .navbar .navbar-nav .nav-item.show > .nav-link {
+        border-top-color: var(--tblr-primary) !important;
+        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
       }
     </style>
   </head>
@@ -6584,5 +6572,42 @@ This textarea grows automatically when you type more content into it.</textarea
       });
     </script>
     <!-- END PAGE SCRIPTS -->
+    <!-- BEGIN CARD ACCENT RANDOMIZATION -->
+    <script>
+      (function () {
+        /* Curated palette: [accent hex, readable text on that bg] */
+        /* Text is pre-computed: white for L < 0.35, black for L >= 0.35 */
+        var palette = [
+          ['#2563eb', '#fff'],  /* blue */
+          ['#1d4ed8', '#fff'],  /* indigo-blue */
+          ['#16a34a', '#fff'],  /* green */
+          ['#15803d', '#fff'],  /* dark green */
+          ['#0369a1', '#fff'],  /* sky */
+          ['#0891b2', '#fff'],  /* cyan */
+          ['#0d9488', '#fff'],  /* teal */
+          ['#7c3aed', '#fff'],  /* violet */
+          ['#6d28d9', '#fff'],  /* purple */
+          ['#9333ea', '#fff'],  /* purple-2 */
+          ['#be185d', '#fff'],  /* pink */
+          ['#9f1239', '#fff'],  /* rose */
+          ['#dc2626', '#fff'],  /* red */
+          ['#b45309', '#fff'],  /* amber dark */
+          ['#c2410c', '#fff'],  /* orange */
+          ['#d97706', '#000'],  /* amber — black text for contrast */
+          ['#65a30d', '#000'],  /* lime — black text */
+          ['#0e7490', '#fff'],  /* cyan dark */
+          ['#1e40af', '#fff'],  /* blue dark */
+          ['#7e22ce', '#fff'],  /* purple dark */
+        ];
+
+        /* Assign a random accent to every .card on the page */
+        document.querySelectorAll('.card').forEach(function (card) {
+          var entry = palette[Math.floor(Math.random() * palette.length)];
+          card.style.setProperty('--si-card-accent', entry[0]);
+          card.style.setProperty('--si-card-text',   entry[1]);
+        });
+      })();
+    </script>
+    <!-- END CARD ACCENT RANDOMIZATION -->
   </body>
 </html>
