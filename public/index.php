@@ -162,6 +162,27 @@
       html[data-bs-theme="dark"] .badge.bg-teal      { --tblr-bg-opacity: 0.25; color: var(--tblr-teal)      !important; }
       html[data-bs-theme="dark"] .badge.bg-cyan      { --tblr-bg-opacity: 0.25; color: var(--tblr-cyan)      !important; }
 
+      /* ===== BADGES — light mode: white/black text for contrast ===== */
+      html:not([data-bs-theme="dark"]) .badge.bg-primary,
+      html:not([data-bs-theme="dark"]) .badge.bg-secondary,
+      html:not([data-bs-theme="dark"]) .badge.bg-success,
+      html:not([data-bs-theme="dark"]) .badge.bg-info,
+      html:not([data-bs-theme="dark"]) .badge.bg-danger,
+      html:not([data-bs-theme="dark"]) .badge.bg-dark,
+      html:not([data-bs-theme="dark"]) .badge.bg-blue,
+      html:not([data-bs-theme="dark"]) .badge.bg-azure,
+      html:not([data-bs-theme="dark"]) .badge.bg-indigo,
+      html:not([data-bs-theme="dark"]) .badge.bg-purple,
+      html:not([data-bs-theme="dark"]) .badge.bg-pink,
+      html:not([data-bs-theme="dark"]) .badge.bg-red,
+      html:not([data-bs-theme="dark"]) .badge.bg-orange,
+      html:not([data-bs-theme="dark"]) .badge.bg-teal,
+      html:not([data-bs-theme="dark"]) .badge.bg-cyan,
+      html:not([data-bs-theme="dark"]) .badge.bg-green   { color: #fff !important; }
+      html:not([data-bs-theme="dark"]) .badge.bg-warning,
+      html:not([data-bs-theme="dark"]) .badge.bg-yellow,
+      html:not([data-bs-theme="dark"]) .badge.bg-lime    { color: #000 !important; }
+
       /* ===== PRIMARY NAV AS CONNECTED TABS ===== */
       /* Suppress Tabler navbar underline indicator */
       .navbar-expand-md #navbar-menu .nav-item.active::after,

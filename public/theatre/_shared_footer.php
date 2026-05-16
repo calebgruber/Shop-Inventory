@@ -83,7 +83,7 @@
           ['#d97706','#000'], ['#65a30d','#000'], ['#0e7490','#fff'],
           ['#1e40af','#fff'], ['#7e22ce','#fff'],
         ];
-        document.querySelectorAll('.card').forEach(function (card) {
+        document.querySelectorAll('.card:not(.si-no-accent)').forEach(function (card) {
           var entry = palette[Math.floor(Math.random() * palette.length)];
           card.style.setProperty('--si-card-accent', entry[0]);
           card.style.setProperty('--si-card-text',   entry[1]);

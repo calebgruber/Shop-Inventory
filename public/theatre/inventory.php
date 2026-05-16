@@ -79,7 +79,7 @@ $search     = $_GET['q'] ?? '';
           <div class="container-xl">
 
             <!-- FILTER BAR -->
-            <div class="card mb-3">
+            <div class="card mb-3 si-no-accent">
               <div class="card-body py-2">
                 <div class="row g-2 align-items-center">
                   <div class="col-12 col-md-5">

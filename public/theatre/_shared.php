@@ -94,6 +94,27 @@ if (!isset($title)) $title = 'Theatre Shop';
         color: var(--si-card-accent);
       }
 
+      /* ===== BADGES — light mode: white/black text for contrast ===== */
+      html:not([data-bs-theme="dark"]) .badge.bg-primary,
+      html:not([data-bs-theme="dark"]) .badge.bg-secondary,
+      html:not([data-bs-theme="dark"]) .badge.bg-success,
+      html:not([data-bs-theme="dark"]) .badge.bg-info,
+      html:not([data-bs-theme="dark"]) .badge.bg-danger,
+      html:not([data-bs-theme="dark"]) .badge.bg-dark,
+      html:not([data-bs-theme="dark"]) .badge.bg-blue,
+      html:not([data-bs-theme="dark"]) .badge.bg-azure,
+      html:not([data-bs-theme="dark"]) .badge.bg-indigo,
+      html:not([data-bs-theme="dark"]) .badge.bg-purple,
+      html:not([data-bs-theme="dark"]) .badge.bg-pink,
+      html:not([data-bs-theme="dark"]) .badge.bg-red,
+      html:not([data-bs-theme="dark"]) .badge.bg-orange,
+      html:not([data-bs-theme="dark"]) .badge.bg-teal,
+      html:not([data-bs-theme="dark"]) .badge.bg-cyan,
+      html:not([data-bs-theme="dark"]) .badge.bg-green   { color: #fff !important; }
+      html:not([data-bs-theme="dark"]) .badge.bg-warning,
+      html:not([data-bs-theme="dark"]) .badge.bg-yellow,
+      html:not([data-bs-theme="dark"]) .badge.bg-lime    { color: #000 !important; }
+
       /* ===== DARK-MODE BADGES ===== */
       html[data-bs-theme="dark"] .badge.bg-primary   { --tblr-bg-opacity: 0.25; color: var(--tblr-primary)   !important; }
       html[data-bs-theme="dark"] .badge.bg-success   { --tblr-bg-opacity: 0.25; color: var(--tblr-success)   !important; }
@@ -192,6 +213,11 @@ if (!isset($title)) $title = 'Theatre Shop';
         animation: none !important;
       }
 
+      /* ===== NO-ACCENT CARDS (filter bars, utility panels) ===== */
+      .card.si-no-accent {
+        border-left: none !important;
+      }
+
       /* ===== STAT CARDS ===== */
       .si-stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; }
       .si-stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: .05em; }
@@ -240,8 +266,10 @@ if (!isset($title)) $title = 'Theatre Shop';
               </div>
             </div>
             <!-- USER MENU -->
-            <div class="nav-item dropdown">
-              <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
+            <div class="nav-item dropdown si-user-menu">
+              <a href="#" class="nav-link d-flex lh-1 p-0 px-2" role="button"
+                data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                aria-expanded="false" aria-label="Open user menu">
                 <span class="avatar avatar-sm" style="background-image: url(../static/avatars/000m.jpg)"></span>
                 <div class="d-none d-xl-block ps-2">
                   <div>Stage Manager</div>
@@ -249,10 +277,24 @@ if (!isset($title)) $title = 'Theatre Shop';
                 </div>
               </a>
               <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <a class="dropdown-item" href="#">Profile</a>
+                <div class="dropdown-header">
+                  <strong>Stage Manager</strong><br>
+                  <span class="text-secondary small">Theatre Shop</span>
+                </div>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="#">Logout</a>
+                <a class="dropdown-item" href="#">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2 icon icon-sm"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855"/></svg>
+                  Profile
+                </a>
+                <a class="dropdown-item" href="#">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2 icon icon-sm"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg>
+                  Settings
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" href="login.php">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2 icon icon-sm"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M9 12h12l-3 -3"/><path d="M18 15l3 -3"/></svg>
+                  Logout
+                </a>
               </div>
             </div>
           </div>
