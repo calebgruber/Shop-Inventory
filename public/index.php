@@ -89,6 +89,11 @@
       html:not([data-bs-theme="dark"]) body,
       html:not([data-bs-theme="dark"]) .page {
         background-color: #f0f6ff;
+        --si-page-bg: #f0f6ff;
+      }
+      html[data-bs-theme="dark"] body,
+      html[data-bs-theme="dark"] .page {
+        --si-page-bg: var(--tblr-bg-surface);
       }
 
       /* ===== CARDS — left border accent only; normal card bg/borders unchanged ===== */
@@ -290,7 +295,7 @@
       #navbar-menu .navbar-nav .nav-item.active > .nav-link,
       #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
       #navbar-menu .navbar-nav .nav-item.show > .nav-link {
-        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
+        background-color: var(--si-page-bg, var(--tblr-bg-surface)) !important;
         border-color: var(--tblr-primary) transparent transparent !important;
         color: var(--tblr-body-color) !important;
         box-shadow: none;
@@ -1213,7 +1218,7 @@
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./settings.html">Settings &amp; Privacy</a>
                 <a class="dropdown-item" href="#">Help</a>
-                <a class="dropdown-item" href="./sign-in.html">Sign out</a>
+                <a class="dropdown-item" href="./sign-in.html">Logout</a>
               </div>
             </div>
             <!-- END USER MENU -->
@@ -6739,15 +6744,21 @@ This textarea grows automatically when you type more content into it.</textarea
         if (liveHoursMinutes && liveSeconds && liveDate) {
           function updateLiveClock() {
             var now = new Date();
-            liveHoursMinutes.textContent = now.toLocaleTimeString(undefined, {
+            var timeParts = new Intl.DateTimeFormat('en-US', {
+              timeZone: 'America/New_York',
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false
-            });
-            liveSeconds.textContent = ':' + now.toLocaleTimeString(undefined, {
-              second: '2-digit'
-            });
-            liveDate.textContent = now.toLocaleDateString(undefined, {
+              second: '2-digit',
+              hour12: true
+            }).formatToParts(now);
+            var part = function (type) {
+              var item = timeParts.find(function (entry) { return entry.type === type; });
+              return item ? item.value : '';
+            };
+            liveHoursMinutes.textContent = part('hour') + ':' + part('minute');
+            liveSeconds.textContent = ':' + part('second') + ' ' + part('dayPeriod');
+            liveDate.textContent = now.toLocaleDateString('en-US', {
+              timeZone: 'America/New_York',
               year: 'numeric',
               month: '2-digit',
               day: '2-digit'
