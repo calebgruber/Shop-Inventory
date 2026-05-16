@@ -93,7 +93,7 @@
       }
       html[data-bs-theme="dark"] body,
       html[data-bs-theme="dark"] .page {
-        --si-page-bg: var(--tblr-bg-surface);
+        --si-page-bg: #111827;
       }
 
       /* ===== CARDS — left border accent only; normal card bg/borders unchanged ===== */
