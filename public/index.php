@@ -192,6 +192,14 @@
         order: 1;
       }
 
+      .si-site-header .navbar-brand img {
+        display: block;
+        height: 36px;
+        width: auto;
+        max-width: 180px;
+        object-fit: contain;
+      }
+
       .si-live-datetime {
         display: inline-flex;
         align-items: center;
@@ -364,7 +372,7 @@
           <!-- BEGIN NAVBAR LOGO -->
           <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
             <a href="." aria-label="Tabler">
-    <img src="https://cdn.calebgruber.me/CalebGruber..png" alt="Logo">
+    <img src="https://cdn.calebgruber.me/CalebGruber..png" alt="Logo" height="36">
   </a>
           </div>
           <!-- END NAVBAR LOGO -->
