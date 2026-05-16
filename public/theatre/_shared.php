@@ -76,7 +76,10 @@ if (!isset($title)) $title = 'Theatre Shop';
       }
       .card .card-title {
         display: inline-flex; align-items: center; gap: 0.5rem;
-        width: fit-content; margin-bottom: 0 !important;
+        width: fit-content;
+        margin-top: calc(-1 * var(--tblr-card-spacer-y, 1.25rem)) !important;
+        margin-bottom: 0 !important;
+        margin-left: calc(-1 * var(--tblr-card-spacer-x, 1.25rem)) !important;
         padding: 0.25rem 0.9rem 0.25rem 0.5rem;
         border-radius: 0 9999px 9999px 0; line-height: 1.25;
         transition: background-color 0.2s ease, color 0.2s ease;
