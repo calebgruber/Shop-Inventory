@@ -13,326 +13,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Shop Inventory UI Test - Custom Tabler (copilot/remove-other-navbars)</title>
+    <!-- Source: calebgruber/custom-tabler branch copilot/remove-other-navbars (built locally for this repo) -->
+    <link href="./static/css/shop-custom.css" rel="stylesheet" />
     <!-- BEGIN PAGE LEVEL STYLES -->
-    <link href="./dist/libs/nouislider/dist/nouislider.min.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/tom-select/dist/css/tom-select.bootstrap5.min.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/jsvectormap/dist/jsvectormap.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/plyr/dist/plyr.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/dropzone/dist/dropzone.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/star-rating.js/dist/star-rating.min.css?1778865600" rel="stylesheet" />
-    <link href="./dist/libs/@melloware/coloris/dist/coloris.min.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/nouislider/dist/nouislider.min.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/tom-select/dist/css/tom-select.bootstrap5.min.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/jsvectormap/dist/jsvectormap.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/plyr/dist/plyr.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/dropzone/dist/dropzone.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/star-rating.js/dist/star-rating.min.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/@melloware/coloris/dist/coloris.min.css?1778865600" rel="stylesheet" />
     <!-- END PAGE LEVEL STYLES -->
     <!-- BEGIN GLOBAL MANDATORY STYLES -->
-    <link href="./dist/css/tabler.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.css?1778865600" rel="stylesheet" />
     <!-- END GLOBAL MANDATORY STYLES -->
     <!-- BEGIN PLUGINS STYLES -->
-    <link href="./dist/css/tabler-flags.css?1778865600" rel="stylesheet" />
-    <link href="./dist/css/tabler-socials.css?1778865600" rel="stylesheet" />
-    <link href="./dist/css/tabler-payments.css?1778865600" rel="stylesheet" />
-    <link href="./dist/css/tabler-vendors.css?1778865600" rel="stylesheet" />
-    <link href="./dist/css/tabler-marketing.css?1778865600" rel="stylesheet" />
-    <link href="./dist/css/tabler-themes.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-flags.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-socials.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-payments.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-vendors.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-marketing.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler-themes.css?1778865600" rel="stylesheet" />
     <!-- END PLUGINS STYLES -->
     <!-- BEGIN DEMO STYLES -->
-    <link href="./preview/css/demo.css?1778865600" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/preview/css/demo.css?1778865600" rel="stylesheet" />
     <!-- END DEMO STYLES -->
     <!-- BEGIN CUSTOM FONT -->
     <style>
       @import url("https://rsms.me/inter/inter.css");
     </style>
     <!-- END CUSTOM FONT -->
-    <!-- Source: calebgruber/custom-tabler branch copilot/remove-other-navbars (built locally for this repo) -->
-    <style>
-      /* ===== PAGE LOADER ===== */
-      #si-page-loader {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--tblr-bg-surface, #fff);
-        transition: opacity 0.35s ease;
-      }
-      #si-page-loader.si-loader-hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
-      .si-loader-ring {
-        width: 3rem;
-        height: 3rem;
-        border: 3px solid var(--tblr-border-color, #dee2e6);
-        border-top-color: var(--tblr-primary, #066fd1);
-        border-radius: 50%;
-        animation: si-spin 0.7s linear infinite;
-      }
-      @keyframes si-spin {
-        to { transform: rotate(360deg); }
-      }
-
-      /* ===== PAGE FADE-IN ANIMATION ===== */
-      @keyframes si-fadein {
-        from { opacity: 0; transform: translateY(10px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .si-animate {
-        opacity: 0;
-        animation: si-fadein 0.45s ease forwards;
-      }
-
-      /* ===== BORDER RADIUS ===== */
-      .btn, .btn-close { border-radius: 1px !important; }
-      .card, .alert, .badge, .avatar, .tag, .steps .step-item { border-radius: 2px !important; }
-      .form-control, .form-select, .form-check-input, .input-group-text { border-radius: 1px !important; }
-
-      /* ===== PAGE BACKGROUND — light mode only ===== */
-      html:not([data-bs-theme="dark"]) body,
-      html:not([data-bs-theme="dark"]) .page {
-        background-color: #f0f6ff;
-        --si-page-bg: #f0f6ff;
-      }
-      html[data-bs-theme="dark"] body,
-      html[data-bs-theme="dark"] .page {
-        --si-page-bg: #111827;
-      }
-
-      /* ===== CARDS — left border accent only; normal card bg/borders unchanged ===== */
-      .card {
-        --si-card-accent: #2563eb;
-        --si-card-text: #fff;
-        border-left: 5px solid var(--si-card-accent) !important;
-      }
-
-      /* Card title chip (entire title element) */
-      .card .card-title {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: fit-content;
-        margin-bottom: 0 !important;
-        padding: 0.25rem 0.9rem 0.25rem 0.5rem;
-        border-radius: 0 9999px 9999px 0;
-        line-height: 1.25;
-        transition: background-color 0.2s ease, color 0.2s ease;
-      }
-
-      /* Keep icon layout, but let color come from .card-title */
-      .card-title-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.75rem;
-        height: 1.75rem;
-        border-radius: 3px;
-        margin-inline-end: 0;
-        flex-shrink: 0;
-        color: inherit;
-      }
-
-      /* Light mode title chip: 100% accent bg, contrasting text */
-      html:not([data-bs-theme="dark"]) .card .card-title {
-        background-color: var(--si-card-accent);
-        color: var(--si-card-text);
-      }
-
-      /* Dark mode title chip: 15% accent bg, 100% accent text */
-      html[data-bs-theme="dark"] .card .card-title {
-        background-color: color-mix(in srgb, var(--si-card-accent) 15%, transparent);
-        color: var(--si-card-accent);
-      }
-
-      /* ===== BADGES — dark mode: text = main color, bg = 25% of main color ===== */
-      html[data-bs-theme="dark"] .badge.bg-primary   { --tblr-bg-opacity: 0.25; color: var(--tblr-primary)   !important; }
-      html[data-bs-theme="dark"] .badge.bg-secondary { --tblr-bg-opacity: 0.25; color: var(--tblr-secondary) !important; }
-      html[data-bs-theme="dark"] .badge.bg-success   { --tblr-bg-opacity: 0.25; color: var(--tblr-success)   !important; }
-      html[data-bs-theme="dark"] .badge.bg-info      { --tblr-bg-opacity: 0.25; color: var(--tblr-info)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-warning   { --tblr-bg-opacity: 0.25; color: var(--tblr-warning)   !important; }
-      html[data-bs-theme="dark"] .badge.bg-danger    { --tblr-bg-opacity: 0.25; color: var(--tblr-danger)    !important; }
-      html[data-bs-theme="dark"] .badge.bg-dark      { --tblr-bg-opacity: 0.25; color: var(--tblr-dark)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-muted     { --tblr-bg-opacity: 0.25; color: var(--tblr-muted)     !important; }
-      html[data-bs-theme="dark"] .badge.bg-blue      { --tblr-bg-opacity: 0.25; color: var(--tblr-blue)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-azure     { --tblr-bg-opacity: 0.25; color: var(--tblr-azure)     !important; }
-      html[data-bs-theme="dark"] .badge.bg-indigo    { --tblr-bg-opacity: 0.25; color: var(--tblr-indigo)    !important; }
-      html[data-bs-theme="dark"] .badge.bg-purple    { --tblr-bg-opacity: 0.25; color: var(--tblr-purple)    !important; }
-      html[data-bs-theme="dark"] .badge.bg-pink      { --tblr-bg-opacity: 0.25; color: var(--tblr-pink)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-red       { --tblr-bg-opacity: 0.25; color: var(--tblr-red)       !important; }
-      html[data-bs-theme="dark"] .badge.bg-orange    { --tblr-bg-opacity: 0.25; color: var(--tblr-orange)    !important; }
-      html[data-bs-theme="dark"] .badge.bg-lime      { --tblr-bg-opacity: 0.25; color: var(--tblr-lime)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-green     { --tblr-bg-opacity: 0.25; color: var(--tblr-green)     !important; }
-      html[data-bs-theme="dark"] .badge.bg-teal      { --tblr-bg-opacity: 0.25; color: var(--tblr-teal)      !important; }
-      html[data-bs-theme="dark"] .badge.bg-cyan      { --tblr-bg-opacity: 0.25; color: var(--tblr-cyan)      !important; }
-
-      /* ===== PRIMARY NAV AS CONNECTED TABS ===== */
-      /* Suppress Tabler navbar underline indicator */
-      .navbar-expand-md #navbar-menu .nav-item.active::after,
-      .navbar-expand-md #navbar-menu .nav-item.show::after {
-        display: none !important;
-      }
-
-      /* Make top header feel like a tab container, not a navbar bar */
-      .page > .navbar {
-        box-shadow: none !important;
-        background: var(--tblr-bg-surface) !important;
-        border-bottom: 0 !important;
-        margin-bottom: 0 !important;
-      }
-      .si-site-header {
-        padding-top: 8px !important;
-        padding-bottom: 0 !important;
-      }
-
-      .si-site-header .container-xl {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        row-gap: 0.5rem;
-      }
-
-      .si-site-header .navbar-brand {
-        order: 1;
-      }
-
-      .si-live-datetime {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-variant-numeric: tabular-nums;
-        font-size: 0.9rem;
-        color: var(--tblr-secondary);
-        padding: 0 0.35rem;
-      }
-
-      .si-live-time {
-        display: inline-flex;
-        align-items: baseline;
-        gap: 0.05rem;
-        color: var(--tblr-body-color);
-        letter-spacing: 0.01em;
-      }
-
-      .si-live-hours-minutes {
-        font-weight: 700;
-      }
-
-      .si-live-seconds {
-        font-weight: 300;
-        opacity: 0.7;
-      }
-
-      .si-live-date {
-        font-size: 0.8rem;
-        color: var(--tblr-secondary);
-        white-space: nowrap;
-      }
-
-      .si-top-utility {
-        order: 2;
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-wrap: nowrap;
-      }
-
-      .si-top-utility > .d-none.d-md-flex {
-        display: flex !important;
-        margin-right: 0 !important;
-      }
-
-      .si-top-utility > .d-none.d-md-flex > .nav-item:not(:first-child) {
-        display: none !important;
-      }
-
-      .si-top-utility .nav-item.si-user-menu {
-        margin-left: 0.1rem;
-      }
-
-      .si-site-header .navbar-toggler {
-        order: 3;
-      }
-
-      #navbar-menu {
-        order: 4;
-        flex-basis: 100%;
-        width: 100%;
-        padding-top: 0;
-        margin-top: 0.25rem;
-        border-top: 1px solid var(--tblr-border-color);
-      }
-
-      #navbar-menu .navbar-nav {
-        gap: 0 !important;
-        align-self: stretch;
-        width: 100%;
-        padding-top: 0;
-      }
-      #navbar-menu .navbar-nav .nav-item {
-        margin: 0 !important;
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      /* True tab shape */
-      #navbar-menu .navbar-nav .nav-link {
-        border: 0 !important;
-        border-top: 4px solid transparent !important;
-        border-bottom: 0 !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
-        padding-top: 0.6rem !important;
-        padding-bottom: 0.6rem !important;
-        background-color: transparent;
-        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-      }
-
-      #navbar-menu .navbar-nav .nav-link:hover,
-      #navbar-menu .navbar-nav .nav-link:focus {
-        background-color: color-mix(in srgb, var(--tblr-primary) 10%, transparent) !important;
-        border-top-color: var(--tblr-primary) !important;
-      }
-
-      #navbar-menu .navbar-nav .nav-link.active,
-      #navbar-menu .navbar-nav .nav-item.active > .nav-link,
-      #navbar-menu .navbar-nav .nav-link[aria-expanded="true"],
-      #navbar-menu .navbar-nav .nav-item.show > .nav-link {
-        background-color: var(--si-page-bg, var(--tblr-bg-surface)) !important;
-        border-color: var(--tblr-primary) transparent transparent !important;
-        color: var(--tblr-body-color) !important;
-        box-shadow: none;
-      }
-
-      @media (max-width: 767.98px) {
-        .si-live-datetime {
-          display: none;
-        }
-        .si-site-header .navbar-toggler {
-          order: 3;
-          margin-left: auto;
-        }
-        .si-top-utility {
-          order: 4;
-          width: 100%;
-          justify-content: flex-end;
-        }
-      }
-
-      /* ===== PROGRESS BARS — static diagonal stripes (no animation) ===== */
-      .progress-bar {
-        background-image: linear-gradient(
-          45deg,
-          rgba(255, 255, 255, 0.2) 25%,
-          transparent 25%,
-          transparent 50%,
-          rgba(255, 255, 255, 0.2) 50%,
-          rgba(255, 255, 255, 0.2) 75%,
-          transparent 75%,
-          transparent
-        ) !important;
-        background-size: 1rem 1rem !important;
-        /* override any animation that may be inherited */
-        animation: none !important;
-      }
-    </style>
   </head>
   <body>
     <!-- BEGIN PAGE LOADER -->
@@ -342,7 +52,7 @@
     <!-- END PAGE LOADER -->
     <a href="#content" class="visually-hidden skip-link">Skip to main content</a>
     <!-- BEGIN GLOBAL THEME SCRIPT -->
-    <script src="./dist/js/tabler-theme.min.js?1778865600"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler-theme.min.js?1778865600"></script>
     <!-- END GLOBAL THEME SCRIPT -->
     <div class="page">
       <!-- BEGIN NAVBAR  -->
@@ -6014,28 +5724,28 @@ This textarea grows automatically when you type more content into it.</textarea
       </form>
     </div>
     <!-- BEGIN PAGE LIBRARIES -->
-    <script src="./dist/libs/imask/dist/imask.min.js?1778865601" defer></script>
-    <script src="./dist/libs/autosize/dist/autosize.min.js?1778865601" defer></script>
-    <script src="./dist/libs/apexcharts/dist/apexcharts.min.js?1778865601" defer></script>
-    <script src="./dist/libs/nouislider/dist/nouislider.min.js?1778865601" defer></script>
-    <script src="./dist/libs/litepicker/dist/litepicker.js?1778865601" defer></script>
-    <script src="./dist/libs/tom-select/dist/js/tom-select.base.min.js?1778865601" defer></script>
-    <script src="./dist/libs/jsvectormap/dist/jsvectormap.min.js?1778865601" defer></script>
-    <script src="./dist/libs/jsvectormap/dist/maps/world.js?1778865601" defer></script>
-    <script src="./dist/libs/jsvectormap/dist/maps/world-merc.js?1778865601" defer></script>
-    <script src="./dist/libs/hugerte/hugerte.min.js?1778865601" defer></script>
-    <script src="./dist/libs/plyr/dist/plyr.min.js?1778865601" defer></script>
-    <script src="./dist/libs/dropzone/dist/dropzone-min.js?1778865601" defer></script>
-    <script src="./dist/libs/star-rating.js/dist/star-rating.min.js?1778865601" defer></script>
-    <script src="./dist/libs/@melloware/coloris/dist/umd/coloris.min.js?1778865601" defer></script>
-    <script src="./dist/libs/signature_pad/dist/signature_pad.umd.min.js?1778865601" defer></script>
-    <script src="./dist/libs/fullcalendar/index.global.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/imask/dist/imask.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/autosize/dist/autosize.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/apexcharts/dist/apexcharts.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/nouislider/dist/nouislider.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/litepicker/dist/litepicker.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/tom-select/dist/js/tom-select.base.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/jsvectormap/dist/jsvectormap.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/jsvectormap/dist/maps/world.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/jsvectormap/dist/maps/world-merc.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/hugerte/hugerte.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/plyr/dist/plyr.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/dropzone/dist/dropzone-min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/star-rating.js/dist/star-rating.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/@melloware/coloris/dist/umd/coloris.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/signature_pad/dist/signature_pad.umd.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/libs/fullcalendar/index.global.min.js?1778865601" defer></script>
     <!-- END PAGE LIBRARIES -->
     <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
-    <script src="./dist/js/tabler.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js?1778865601" defer></script>
     <!-- END GLOBAL MANDATORY SCRIPTS -->
     <!-- BEGIN DEMO SCRIPTS -->
-    <script src="./preview/js/demo.min.js?1778865601" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/preview/js/demo.min.js?1778865601" defer></script>
     <!-- END DEMO SCRIPTS -->
     <!-- BEGIN PAGE SCRIPTS -->
     <script>
