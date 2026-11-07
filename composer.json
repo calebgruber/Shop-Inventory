@@ -1,0 +1,25 @@
+{
+    "name": "calebgruber/theatre-shop",
+    "description": "Show-centric theatre shop management for PHP shared hosting",
+    "type": "project",
+    "require": {
+        "php": "^8.3",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-fileinfo": "*",
+        "ext-gd": "*",
+        "dompdf/dompdf": "^3.1",
+        "lbuchs/webauthn": "^2.2",
+        "setasign/fpdi": "^2.6",
+        "setasign/fpdf": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {"App\\": "app/"}
+    },
+    "scripts": {
+        "test": "php tests/run.php"
+    },
+    "config": {"sort-packages": true}
+}

@@ -1,0 +1,7 @@
+/config/local.php
+/vendor/
+/storage/logs/*
+/storage/uploads/*
+/storage/pdfs/*
+!/storage/**/.gitkeep
+.DS_Store

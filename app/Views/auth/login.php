@@ -1,0 +1,17 @@
+<?php $brand = App\Services\Settings::get('brand_name','Theatre Shop'); ?>
+<!doctype html><html lang="en" data-bs-theme="<?= e(App\Services\Settings::get('theme_default','dark')) ?>"><head><title>Sign in | <?= e($brand) ?></title><?php require ROOT . '/app/Views/partials/head.php'; ?></head>
+<body class="login-page"><div id="page-loader" class="page-loader" role="progressbar" aria-label="Loading" hidden></div>
+<?php foreach (['light','dark'] as $theme): ?><?php if (App\Services\Settings::get('background_' . $theme)!==''): ?><img class="login-backdrop <?= App\Services\Settings::get('background_' . ($theme==='light'?'dark':'light'))===''?'brand-shared':'brand-' . $theme ?>" src="/branding/background_<?= $theme ?>" alt=""><?php endif; ?><?php endforeach; ?>
+<button class="btn login-theme" data-theme-toggle aria-label="Toggle color theme"><span class="material-symbols-rounded" aria-hidden="true">contrast</span></button>
+<main class="login-shell"><section class="login-story"><div class="story-kicker">BUILT FOR THE SHOP. CENTERED ON THE SHOW.</div><h1>Behind every<br>great show.</h1><p>One workspace for the equipment, people, and preparation that bring your production to life.</p><div class="story-tags"><span>Lighting</span><span>Audio</span><span>Rigging</span><span>Production</span></div><div class="stage-grid" aria-hidden="true"></div></section>
+<section class="login-panel"><div class="login-brand"><?php if (App\Services\Settings::get('logo_light')!=='' || App\Services\Settings::get('logo_dark')!==''): ?>
+<?php foreach (['light','dark'] as $theme): ?><?php if (App\Services\Settings::get('logo_' . $theme)!==''): ?><img class="<?= App\Services\Settings::get('logo_' . ($theme==='light'?'dark':'light'))===''?'brand-shared':'brand-' . $theme ?>" src="/branding/logo_<?= $theme ?>" alt="<?= e($brand) ?>"><?php endif; ?><?php endforeach; ?>
+<?php else: ?><span class="material-symbols-rounded" aria-hidden="true">theater_comedy</span><strong><?= e($brand) ?></strong><?php endif; ?></div>
+<p class="eyebrow">YOUR SHOP WORKSPACE</p><h2>Welcome back.</h2><p class="text-secondary mb-4">Sign in to keep the next show moving.</p>
+<form action="/login" method="post" data-ajax-form data-login><?= csrf() ?>
+<div class="mb-3"><label class="form-label" for="username">Username or email</label><input class="form-control" id="username" name="username" autocomplete="username webauthn" required maxlength="254" autofocus></div>
+<div class="mb-3"><div class="d-flex justify-content-between"><label class="form-label" for="password">Password</label><a href="/forgot-password">Forgot password?</a></div><input class="form-control" type="password" name="password" id="password" autocomplete="current-password" required maxlength="1024"></div>
+<div class="form-error" role="alert" hidden></div><button class="btn btn-primary w-100" type="submit">Sign in<span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></button></form>
+<div class="login-divider"><span>or use your device</span></div><button class="btn w-100 passkey-button" data-passkey-login><span class="material-symbols-rounded" aria-hidden="true">fingerprint</span>Sign in with a passkey</button>
+<p class="login-help">Face ID, Touch ID, Windows Hello, or a security key.<br>Need access? Contact your shop administrator.</p>
+<div class="login-security"><span class="material-symbols-rounded" aria-hidden="true">lock</span>Secure, show-centered shop management</div></section></main><div id="notifications" class="notifications" aria-live="polite"></div></body></html>
