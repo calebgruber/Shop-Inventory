@@ -38,11 +38,11 @@ The password-reset email uses styles from the uploaded local Tabler typography e
 
    Upload `vendor/` with the application if Composer is unavailable on the host. No Node.js, Redis, Docker, PM2, worker daemon, or custom production server is required.
 
-3. Create a database and user using cPanel's MySQL tools. Copy `config/local.example.php` to **`config/local.php`** and enter the credentials, canonical HTTPS origin, and an authorized `mail_from` address. Do not commit this file. The application URL must be an origin such as `https://shop.example.edu`, without a path; WebAuthn verifies that exact origin.
+3. Create an empty database and database user using cPanel's MySQL tools, and grant the user full access to that database. Enable AutoSSL so the application has HTTPS before installation. Browse to `https://your-domain.example/setup` and follow the setup wizard: enter the database credentials and system email, create the first Super Admin, and the wizard will test the database, apply migrations, save private configuration, and create the administrator. The origin must match the domain open in the browser. The wizard refuses unrelated tables or existing user accounts. If setup is interrupted, revisit `/setup` over HTTPS to resume. Never reuse a database containing production or unrelated data.
 4. Point the domain/subdomain document root to **`public/`**. Keep `app`, `config`, `database`, `resources`, `routes`, `storage`, `vendor`, and the uploaded source UI outside the document root. Apache must permit the supplied `public/.htaccess` and `mod_rewrite`.
 5. If cPanel cannot point at `public/`, the repository-root `.htaccess` also supports a root installation. It routes to the public front controller and blocks private directories, dotfiles, source UI examples, CLI scripts, direct `.php` URLs, and direct `/public` access. Do not remove those rules. Verify them on your host.
 6. Make `storage/uploads`, `storage/pdfs`, and `storage/logs` writable by the PHP account, without using `777`. Keep the rest of the application read-only to the web process where possible.
-7. Back up the database and storage, then run:
+7. The setup wizard applies the migrations and creates the first administrator. For upgrades and command-line recovery, back up the database and storage, then run:
 
    ```sh
    php migrate.php

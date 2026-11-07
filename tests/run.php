@@ -88,6 +88,12 @@ test('Avatar is deterministic and differs across seeds',function (): void {
     same(false,$one===App\Services\Avatar::svg(str_repeat('b',32)));
     same(false,str_contains($one,'http://api.'));
 });
+test('Setup recognizes the full schema and status can be inspected before installation',function (): void {
+    $tables = App\Services\Migrations::tableNames();
+    same(true,in_array('users',$tables,true));
+    same(true,in_array('migrations',$tables,true));
+    same(true,count($tables)>=27);
+});
 
 if (in_array('--integration',$argv,true)) {
     if (!str_ends_with(App\Services\Config::get('database')['name'],'_testing') ||

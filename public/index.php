@@ -6,6 +6,10 @@ ini_set('log_errors','1');
 try {
     require dirname(__DIR__) . '/bootstrap.php';
     App\Middleware\Security::start();
+    if (!is_file(ROOT . '/config/local.php') &&
+        (parse_url($_SERVER['REQUEST_URI'] ?? '/',PHP_URL_PATH) ?: '/') !== '/setup') {
+        redirect('/setup');
+    }
     $router = new App\Services\Router();
     require ROOT . '/routes/web.php';
     $router->dispatch();

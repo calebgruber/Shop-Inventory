@@ -7,6 +7,11 @@ use App\Controllers\InventoryController;
 use App\Controllers\OperationsController;
 use App\Controllers\SettingsController;
 use App\Controllers\ReportsController;
+use App\Controllers\SetupController;
+
+$setup = new SetupController();
+$router->add('GET','/setup',[$setup,'show']);
+$router->add('POST','/setup',[$setup,'install']);
 
 $auth = new AuthController();
 $workspace = new WorkspaceController();
