@@ -89,11 +89,12 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
 .eyebrow { font-size: 10px; font-weight: 700; color: var(--shop-muted); letter-spacing: 1.6px; margin-bottom: 7px !important; }
 .page-actions, .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .section-actions { margin-bottom: 26px; }
-.working-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--shop-border); margin: 0 0 38px; overflow-x: auto; }
+.working-tabs { display: flex; gap: 10px; margin: 0; overflow-x: auto; }
 .working-tabs a { display: inline-flex; align-items: center; gap: 7px; padding: 14px 18px; border-radius: 5px 5px 0 0; border-top: 4px solid var(--shop-accent); background: var(--shop-tab); color: var(--shop-muted); white-space: nowrap; font-weight: 600; }
 .working-tabs a > .material-symbols-rounded { color: var(--shop-accent); font-size: 19px; line-height: 1; }
-.working-tabs a.active { background: var(--shop-surface); color: var(--shop-text); box-shadow: inset 0 -2px var(--shop-surface); }
+.working-tabs a.active { background: var(--shop-raised); color: var(--shop-text); }
 .working-tabs a:hover { color: var(--shop-text); text-decoration: none; }
+.show-working-content { background: var(--shop-raised); border: 1px solid var(--shop-border); border-radius: 0 8px 8px 8px; padding: 38px 24px 12px; min-width: 0; }
 .card.floating-card { position: relative; background: var(--shop-surface); border: 1px solid var(--shop-border); border-left: 5px solid var(--shop-accent); border-radius: 8px; box-shadow: var(--shop-shadow); margin: 16px 0 30px; min-width: 0; }
 .floating-label { position: absolute; left: -5px; top: -14px; margin: 0; padding: 11px 23px 11px 16px; background: var(--shop-tint); border-left: 5px solid var(--shop-accent); border-radius: 5px 28px 28px 0; color: var(--shop-text); font-size: 14px; font-weight: 650; max-width: calc(100% - 16px); display: flex; align-items: center; gap: 10px; z-index: 1; }
 .floating-label > .material-symbols-rounded { color: var(--shop-accent); }
@@ -229,6 +230,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
     .shop-brand { font-size: 18px; } .global-search { order: 4; flex-basis: 100%; max-width: none; }
     .header-icon { margin-left: auto; } .primary-nav, .workspace-tabs { padding-left: 14px; padding-right: 14px; }
     #workspace-content { padding: 25px 18px 40px; } .page-heading { flex-direction: column; align-items: flex-start; gap: 18px; }
+    .show-working-content { padding: 30px 14px 10px; }
     .page-heading h1 { font-size: 24px; } .dashboard-grid, .form-grid { grid-template-columns: 1fr; gap: 0; }
     .widget-grid { gap: 0 14px; } .floating-label { font-size: 12px; gap: 6px; padding: 10px 16px 10px 10px; } .floating-label .material-symbols-rounded { font-size: 18px; }
     .floating-card > .card-body { padding: 48px 16px 20px; } .stat-card .stat-number { font-size: 35px; }

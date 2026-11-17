@@ -288,6 +288,10 @@ final class Inventory
     {
         $contentHash = hash('sha256',preg_replace('/^\xEF\xBB\xBF/','',$content));
         $parsed = self::parseCatalog($content);
+        if (!\Illuminate\Support\Facades\Schema::hasTable('inventory_imports') ||
+            !\Illuminate\Support\Facades\Schema::hasColumns('item_types',['sku','unit','default_note','description'])) {
+            throw new HttpException(503,'The catalog import database update is missing. Ask an administrator to back up the database and run php artisan migrate --force.');
+        }
         $rows = $parsed['rows'];
         return DB::transaction(function () use ($contentHash,$parsed,$rows): array {
             if (DB::one('SELECT id FROM inventory_imports WHERE content_hash=? FOR UPDATE',[$contentHash])) {
@@ -342,7 +346,6 @@ final class Inventory
                 'rows'=>$parsed['row_count'],'item_types'=>count($rows),'created_item_types'=>$createdTypes,
                 'added_assets'=>$addedAssets,'source_hash'=>$contentHash,'items'=>$typeResults,
             ]);
-            Documents::generate('inventory',0);
             return ['rows'=>$parsed['row_count'],'item_types'=>count($rows),'created_item_types'=>$createdTypes,'assets_added'=>$addedAssets];
         });
     }
@@ -380,10 +383,6 @@ final class Inventory
             $params=[];
             for ($i=0;$i<$count;$i++) {
                 $tag=$prefix . '-' . str_pad((string)$next++,4,'0',STR_PAD_LEFT);
-                if (in_array($tag,$tags,true)) {
-                    throw new HttpException(409,"Generated serialized asset tag $tag already exists.");
-                }
-                $tags[]=$tag;
                 $batchTags[]=$tag;
                 $values[]='(?,?,NULL)';
                 array_push($params,$typeId,$tag);

@@ -451,6 +451,19 @@ if (in_array('--integration',$argv,true)) {
         app()->instance('request',$request);
         Auth::establish($admin);
     });
+    test('Large catalog import creates assets without rendering an inventory PDF',function (): void {
+        $csv = "category,name,shop_quantity,unit,default_note,description\n";
+        for ($i=0;$i<120;$i++) {
+            $csv .= "LARGE IMPORT,Equipment $i,30,ea,,\n";
+        }
+        $before = (int)DB::one('SELECT COUNT(*) AS total FROM documents')['total'];
+        $result = Inventory::importCatalog($csv);
+        same(120,$result['created_item_types']);
+        same(3600,$result['assets_added']);
+        same(3600,(int)DB::one("SELECT COUNT(*) AS total FROM assets a JOIN item_types i ON i.id=a.item_type_id JOIN folders f ON f.id=i.folder_id WHERE f.name='LARGE IMPORT'")['total']);
+        same($before,(int)DB::one('SELECT COUNT(*) AS total FROM documents')['total']);
+        rejects(fn() => Inventory::importCatalog($csv),409);
+    });
 }
 echo "$passed passed, $failed failed\n";
 ob_end_flush();
