@@ -94,6 +94,23 @@ test('Setup recognizes the full schema and status can be inspected before instal
     same(true,in_array('migrations',$tables,true));
     same(true,count($tables)>=27);
 });
+test('Periodic Laravel session rotation preserves active form tokens',function (): void {
+    App\Middleware\Security::start();
+    $token = App\Middleware\Security::token();
+    $id = session()->getId();
+    App\Middleware\Security::rotate();
+    same($token,App\Middleware\Security::token());
+    same(false,$id===session()->getId());
+});
+test('Background Livewire polling does not extend the idle timeout',function (): void {
+    $request = request();
+    app()->instance('request',Illuminate\Http\Request::create('/livewire/update','POST'));
+    $seen = time()-30;
+    session()->put('last_seen',$seen);
+    App\Middleware\Security::start();
+    same($seen,session('last_seen'));
+    app()->instance('request',$request);
+});
 
 if (in_array('--integration',$argv,true)) {
     if (!str_ends_with(App\Services\Config::get('database')['name'],'_testing') ||
@@ -105,7 +122,7 @@ if (in_array('--integration',$argv,true)) {
     Auth::establish(DB::one('SELECT * FROM users WHERE id=?',[$userId]));
     test('Migration tracking records every filename as applied',function (): void {
         $rows = DB::all('SELECT name,status FROM migrations ORDER BY name');
-        $names = array_map('basename',glob(ROOT . '/database/migrations/*.php'));
+        $names = array_map('basename',glob(ROOT . '/database/legacy/*.php'));
         same($names,array_column($rows,'name'));
         same(array_fill(0,count($names),'applied'),array_column($rows,'status'));
     });
@@ -257,9 +274,9 @@ if (in_array('--integration',$argv,true)) {
         same(0,App\Services\Tables::query('assets',['q'=>'%'])['total']);
     });
     test('CSRF rejects missing and forged tokens',function (): void {
-        $_POST['_csrf'] = 'forged';
+        request()->headers->set('X-CSRF-TOKEN','forged');
         rejects(fn() => App\Middleware\Security::verify(),419);
-        $_POST['_csrf'] = App\Middleware\Security::token();
+        request()->headers->set('X-CSRF-TOKEN',App\Middleware\Security::token());
         App\Middleware\Security::verify();
     });
     test('Database prevents revision and audit history rewrites',function () use ($revisionId): void {
@@ -354,6 +371,16 @@ if (in_array('--integration',$argv,true)) {
         rejects(fn() => Inventory::remove('category',$category));
         rejects(fn() => Inventory::update('item-type',$fixture,['name'=>'Renamed Fixture','folder_id'=>$subcategory,'prefix'=>'S4']));
         rejects(fn() => Inventory::update('category',$subcategory,['name'=>'Fixtures','parent_id'=>null]));
+    });
+    test('Background polling expires idle authenticated sessions',function (): void {
+        $admin = Auth::user();
+        $request = request();
+        app()->instance('request',Illuminate\Http\Request::create('/livewire/update','POST'));
+        session()->put('last_seen',time()-App\Services\Config::get('session_idle_seconds')-1);
+        App\Middleware\Security::start();
+        same(null,Auth::user());
+        app()->instance('request',$request);
+        Auth::establish($admin);
     });
 }
 echo "$passed passed, $failed failed\n";

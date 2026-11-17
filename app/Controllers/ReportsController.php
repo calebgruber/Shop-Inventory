@@ -13,7 +13,7 @@ final class ReportsController
 {
     public function index(): void
     {
-        \view('reports/index',['title'=>'Reports','workspaceKey'=>'reports']);
+        \shop_view('reports/index',['title'=>'Reports','workspaceKey'=>'reports']);
     }
 
     public function timeline(): void
@@ -22,7 +22,7 @@ final class ReportsController
         $subcategories = DB::all('SELECT * FROM folders WHERE parent_id IS NOT NULL ORDER BY sort_position');
         $types = DB::all('SELECT id,name FROM item_types ORDER BY name');
         $shows = DB::all('SELECT id,name,theatre FROM shows ORDER BY name');
-        \view('reports/timeline',compact('categories','subcategories','types','shows')+['title'=>'Equipment Timeline','workspaceKey'=>'timeline']);
+        \shop_view('reports/timeline',compact('categories','subcategories','types','shows')+['title'=>'Equipment Timeline','workspaceKey'=>'timeline']);
     }
 
     public function timelineData(): void
@@ -103,10 +103,9 @@ final class ReportsController
             throw new \RuntimeException('Document is missing or failed integrity verification.');
         }
         Audit::record('document.downloaded','document',$id);
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="' . $document['type'] . '-' . $document['entity_id'] . '-' . $id . '.pdf"');
-        header('Content-Length: ' . filesize($path));
-        readfile($path);
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(response()->download(
+            $path,$document['type'] . '-' . $document['entity_id'] . '-' . $id . '.pdf',['Content-Type'=>'application/pdf']
+        ));
     }
 
     public function file(int $id): void
@@ -117,9 +116,8 @@ final class ReportsController
             throw new \RuntimeException('The uploaded file is missing.');
         }
         Audit::record('file.downloaded','show',(int)$file['show_id'],['file_id'=>$id]);
-        header('Content-Type: ' . $file['mime']);
-        header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode($file['original_name']));
-        header('Content-Length: ' . filesize($path));
-        readfile($path);
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->download($path,$file['original_name'],['Content-Type'=>$file['mime']])
+        );
     }
 }

@@ -7,22 +7,20 @@ use App\Middleware\Security;
 
 final class Auth
 {
-    private static ?array $user = null;
     private const DUMMY_HASH = '$argon2id$v=19$m=65536,t=4,p=1$S0pNMVZoaVJ4VnZLQ2pIdA$siLsk+kexNCOfWzIyrCmKo2KIuhJw7ALPQZjm3lxVDI';
 
     public static function user(): ?array
     {
-        if (!isset($_SESSION['user_id'])) {
+        $id = \Illuminate\Support\Facades\Auth::id();
+        if (!$id) {
             return null;
         }
-        if (self::$user === null) {
-            self::$user = DB::one('SELECT * FROM users WHERE id=? AND active=1', [$_SESSION['user_id']]);
-            if (!self::$user || self::$user['auth_version'] !== ($_SESSION['auth_version'] ?? null)) {
-                self::logout(false);
-                return null;
-            }
+        $user = DB::one('SELECT * FROM users WHERE id=? AND active=1',[$id]);
+        if (!$user || (int)$user['auth_version']!==(int)session('auth_version')) {
+            self::logout(false);
+            return null;
         }
-        return self::$user;
+        return $user;
     }
 
     public static function throttle(string $identifier): void
@@ -45,6 +43,18 @@ final class Auth
     }
 
     public static function login(string $username, string $password): void
+    {
+        $request = \Illuminate\Http\Request::create('/login','POST',compact('username','password'));
+        $request->setLaravelSession(session()->driver());
+        app(\Illuminate\Pipeline\Pipeline::class)->send($request)->through([
+            \Laravel\Fortify\Actions\AttemptToAuthenticate::class,
+            \Laravel\Fortify\Actions\PrepareAuthenticatedSession::class,
+        ])->then(function (): void {
+            self::recordAuthentication(\Illuminate\Support\Facades\Auth::user()->toArray());
+        });
+    }
+
+    public static function validateCredentials(string $username,string $password): \App\Models\User
     {
         self::throttle($username);
         $id = DB::one('SELECT id FROM users WHERE username=? OR email=?', [$username, $username]);
@@ -69,18 +79,24 @@ final class Auth
         if (!$valid) {
             throw new HttpException(422, 'Unable to sign in with these credentials. The account may be temporarily locked.');
         }
-        self::establish($user);
+        return \App\Models\User::findOrFail($user['id']);
     }
 
     public static function establish(array $user): void
     {
+        session()->invalidate();
+        \Illuminate\Support\Facades\Auth::login(\App\Models\User::findOrFail($user['id']));
         Security::rotate();
-        $_SESSION = [
+        self::recordAuthentication($user);
+    }
+
+    private static function recordAuthentication(array $user): void
+    {
+        session()->put([
             'user_id' => $user['id'], 'auth_version' => $user['auth_version'],
             'authenticated_at' => time(), 'last_seen' => time(), 'rotated_at' => time(),
-            '_csrf' => bin2hex(random_bytes(32)),
-        ];
-        self::$user = $user;
+        ]);
+        session()->regenerateToken();
         try {
             Audit::record('login.success', 'user', (int) $user['id']);
         } catch (\Throwable $error) {
@@ -92,14 +108,13 @@ final class Auth
     public static function logout(bool $audit = true): void
     {
         try {
-            if ($audit && isset($_SESSION['user_id'])) {
-                Audit::record('logout', 'user', (int) $_SESSION['user_id']);
+            if ($audit && session()->has('user_id')) {
+                Audit::record('logout', 'user', (int)session('user_id'));
             }
         } finally {
-            $_SESSION = [];
-            self::$user = null;
-            Security::rotate();
-            Security::token();
+            \Illuminate\Support\Facades\Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
         }
     }
 
@@ -108,7 +123,7 @@ final class Auth
         if (strlen($password) < 12 || strlen($password) > 1024) {
             throw new HttpException(422, 'Passwords must be between 12 and 1024 characters.');
         }
-        return password_hash($password, PASSWORD_ARGON2ID);
+        return \Illuminate\Support\Facades\Hash::make($password);
     }
 
     public static function uniqueIdentifiers(string $username,string $email,?int $exclude = null): void

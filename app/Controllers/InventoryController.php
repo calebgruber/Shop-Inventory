@@ -13,7 +13,7 @@ final class InventoryController
     {
         $folders = DB::all('SELECT * FROM folders ORDER BY sort_position,id');
         $types = DB::all('SELECT * FROM item_types ORDER BY sort_position,id');
-        \view('inventory/categories',compact('folders','types')+['title'=>'Inventory Categories','workspaceKey'=>'categories']);
+        \shop_view('inventory/categories',compact('folders','types')+['title'=>'Inventory Categories','workspaceKey'=>'categories']);
     }
 
     public function form(string $resource,?int $id = null): void
@@ -24,7 +24,7 @@ final class InventoryController
         if ($id && !$record) {
             throw new HttpException(404,'Inventory record not found.');
         }
-        \view('inventory/form',compact('resource','folders','types','record')+['title'=>($id?'Edit ':'Add ') . $resource,'workspaceKey'=>'inventory-' . $resource . ($id?':' . $id:'')]);
+        \shop_view('inventory/form',compact('resource','folders','types','record')+['title'=>($id?'Edit ':'Add ') . $resource,'workspaceKey'=>'inventory-' . $resource . ($id?':' . $id:'')]);
     }
 
     public function save(string $resource,?int $id = null): void
@@ -44,7 +44,7 @@ final class InventoryController
     public function importForm(): void
     {
         $types = DB::all('SELECT id,name FROM item_types ORDER BY name');
-        \view('inventory/import',compact('types')+['title'=>'Import Serialized Assets','workspaceKey'=>'import']);
+        \shop_view('inventory/import',compact('types')+['title'=>'Import Serialized Assets','workspaceKey'=>'import']);
     }
 
     public function import(): void
@@ -69,13 +69,13 @@ final class InventoryController
         $asset = DB::one('SELECT a.*,i.name AS item_name FROM assets a JOIN item_types i ON i.id=a.item_type_id WHERE a.id=?',[$id]) ?? throw new HttpException(404,'Asset not found.');
         $events = DB::all('SELECT e.*,s.name AS show_name,u.name AS user_name FROM asset_events e LEFT JOIN shows s ON s.id=e.show_id JOIN users u ON u.id=e.created_by WHERE e.asset_id=? ORDER BY e.created_at,e.id',[$id]);
         $assignments = DB::all('SELECT a.*,s.name AS show_name FROM assignments a JOIN shows s ON s.id=a.show_id WHERE a.asset_id=? ORDER BY a.id',[$id]);
-        \view('inventory/asset',compact('asset','events','assignments')+['title'=>$asset['asset_tag'],'workspaceKey'=>'asset:' . $id]);
+        \shop_view('inventory/asset',compact('asset','events','assignments')+['title'=>$asset['asset_tag'],'workspaceKey'=>'asset:' . $id]);
     }
 
     public function package(int $id): void
     {
         $package = DB::one('SELECT * FROM packages WHERE id=?',[$id]) ?? throw new HttpException(404,'Package not found.');
         $components = DB::all('SELECT c.*,i.name AS item_name FROM package_components c JOIN item_types i ON i.id=c.item_type_id WHERE c.package_id=?',[$id]);
-        \view('inventory/package',compact('package','components')+['title'=>$package['name'],'workspaceKey'=>'package:' . $id]);
+        \shop_view('inventory/package',compact('package','components')+['title'=>$package['name'],'workspaceKey'=>'package:' . $id]);
     }
 }

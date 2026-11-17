@@ -17,17 +17,14 @@ final class Mail
         $styles = preg_replace('/url\([^)]*\)/i', 'none', $styles);
         $brand = Settings::get('brand_name', Config::get('name'));
         ob_start();
-        require ROOT . '/app/Views/emails/password-reset.php';
+        require ROOT . '/resources/views/emails/password-reset.php';
         $body = ob_get_clean();
         $from = Config::get('mail_from');
         if (!filter_var($from, FILTER_VALIDATE_EMAIL) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \RuntimeException('Invalid mail configuration.');
         }
-        $sent = mail($email, 'Reset your Theatre Shop password', $body, [
-            'From' => $from, 'MIME-Version' => '1.0', 'Content-Type' => 'text/html; charset=UTF-8',
-        ]);
-        if (!$sent) {
-            throw new \RuntimeException('Password reset email could not be sent. Check cPanel mail delivery.');
-        }
+        \Illuminate\Support\Facades\Mail::html($body,function (\Illuminate\Mail\Message $message) use ($email,$from,$brand): void {
+            $message->to($email)->from($from,$brand)->subject('Reset your Theatre Shop password');
+        });
     }
 }

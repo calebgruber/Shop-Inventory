@@ -238,3 +238,9 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
     .notifications { left: 16px; right: 16px; bottom: 16px; } .scan-count { font-size: 46px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+.shop-live-status { display: flex; align-items: center; gap: .4rem; }
+.shop-live-status .btn { display: inline-flex; align-items: center; gap: .4rem; }
+.live-status-dot { width: .45rem; height: .45rem; border-radius: 50%; background: #35a66b; }
+@media (max-width: 600px) {
+    .shop-live-status .btn { min-width: 0; padding-inline: .5rem; }
+}

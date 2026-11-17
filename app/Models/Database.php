@@ -2,33 +2,20 @@
 declare(strict_types=1);
 namespace App\Models;
 
-use App\Services\Config;
 use PDO;
 
 final class Database
 {
-    private static ?PDO $connection = null;
-
     public static function connection(): PDO
     {
-        if (self::$connection === null) {
-            $c = Config::get('database');
-            self::$connection = new PDO(
-                "mysql:host={$c['host']};port={$c['port']};dbname={$c['name']};charset=utf8mb4",
-                $c['username'], $c['password'],
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false]
-            );
-            self::$connection->exec("SET time_zone = '+00:00'");
-        }
-        return self::$connection;
+        return \Illuminate\Support\Facades\DB::connection()->getPdo();
     }
 
     public static function all(string $sql, array $params = []): array
     {
         $stmt = self::connection()->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function one(string $sql, array $params = []): ?array
@@ -51,17 +38,11 @@ final class Database
 
     public static function transaction(callable $callback): mixed
     {
-        $db = self::connection();
-        $db->beginTransaction();
         try {
-            $result = $callback();
-            $db->commit();
+            $result = \Illuminate\Support\Facades\DB::transaction($callback);
             \App\Services\Documents::commitPending();
             return $result;
         } catch (\Throwable $error) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
             \App\Services\Documents::rollbackPending();
             throw $error;
         }

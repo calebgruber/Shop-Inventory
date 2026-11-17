@@ -143,7 +143,7 @@
         return true;
     }
 
-    async function navigate(url, push = true) {
+    async function navigate(url, push = true, live = false) {
         if (!$('#workspace-content') || /^\/(?:login|forgot-password|reset-password)(?:[/?]|$)/.test(url)) {
             location.assign(url);
             return;
@@ -153,7 +153,7 @@
         navigationController = controller;
         globalLoading(true);
         try {
-            const result = await api(url, { headers: { 'X-Workspace': '1' }, signal: controller.signal });
+            const result = await api(url, { headers: { 'X-Workspace': '1', ...(live ? { 'X-Shop-Live-Refresh': '1' } : {}) }, signal: controller.signal });
             if (controller.signal.aborted) return;
             if (!openTab(result.key, result.label, url)) return;
             csrfToken = result.csrf;
@@ -265,6 +265,9 @@
         let state = { q: '', page: 1, limit: 25, sort: '', direction: 'asc', filter: {}, hidden: [] };
         let controller;
         let timer;
+        root.addEventListener('shop:refresh', () => {
+            if (root.getAttribute('aria-busy') !== 'true') load(true);
+        });
         const fixed = root.dataset.fixedFilter;
         const syncControls = () => {
             $('[data-table-search]', root).value = state.q;
@@ -277,7 +280,7 @@
         const visibility = () => {
             $$('[data-column-name]', root).forEach(node => node.hidden = state.hidden.includes(node.dataset.columnName));
         };
-        async function load() {
+        async function load(live = false) {
             controller?.abort();
             controller = new AbortController();
             const current = controller;
@@ -299,7 +302,7 @@
                 query.set('item_type_id', new URLSearchParams(location.search).get('type'));
             }
             try {
-                const result = await api(`/api/table?${query}`, { signal: current.signal });
+                const result = await api(`/api/table?${query}`, { headers: live ? { 'X-Shop-Live-Refresh': '1' } : {}, signal: current.signal });
                 if (!root.isConnected || current.signal.aborted) return;
                 state.page = result.page;
                 const body = $('tbody', root);
@@ -519,7 +522,8 @@
         let controller;
         let timer;
         const form = $('[data-timeline-filters]', root);
-        async function load() {
+        root.addEventListener('shop:refresh', () => load(true));
+        async function load(live = false) {
             controller?.abort();
             controller = new AbortController();
             const current = controller;
@@ -529,7 +533,7 @@
             const query = new URLSearchParams(new FormData(form));
             query.set('page', page);
             try {
-                const data = await api(`/api/timeline?${query}`, { signal: current.signal });
+                const data = await api(`/api/timeline?${query}`, { headers: live ? { 'X-Shop-Live-Refresh': '1' } : {}, signal: current.signal });
                 if (!root.isConnected || current.signal.aborted) return;
                 page = data.page;
                 const dates = [];
@@ -763,6 +767,27 @@
         if (event.key === 'Escape' && $('#search-results')) $('#search-results').hidden = true;
     });
 
+    let liveRefreshTimer;
+    window.addEventListener('shop-updated', () => {
+        clearTimeout(liveRefreshTimer);
+        liveRefreshTimer = setTimeout(() => {
+            if (document.hidden || document.querySelector('form[aria-busy="true"]')) return;
+            $$('[data-table], [data-timeline]').forEach(node => node.dispatchEvent(new Event('shop:refresh')));
+            if (location.pathname === '/dashboard') navigate('/dashboard', false, true);
+        }, 300);
+    });
+    document.addEventListener('livewire:init', () => {
+        window.Livewire.hook('request', ({ fail }) => {
+            fail(({ status, preventDefault }) => {
+                preventDefault();
+                if (status === 401 || status === 419) {
+                    notify('Your session expired. Refresh the page and sign in again to restore live updates.', true);
+                } else {
+                    notify('Live updates could not connect. Use the Live button to retry or refresh the page.', true);
+                }
+            });
+        });
+    });
     const workspace = $('#workspace-content');
     if (workspace) {
         try { tabs = JSON.parse($('#workspace-tabs').dataset.tabs); }

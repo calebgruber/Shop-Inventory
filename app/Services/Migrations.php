@@ -9,6 +9,15 @@ final class Migrations
 {
     public static function apply(): array
     {
+        $result = \Illuminate\Support\Facades\Artisan::call('migrate',['--force'=>true]);
+        if ($result!==0) {
+            throw new \RuntimeException('Laravel migrations failed. See the application log.');
+        }
+        return array_column(self::status(),'name');
+    }
+
+    public static function applyLegacy(): array
+    {
         $db = DB::connection();
         $locked = DB::one("SELECT GET_LOCK('theatre_shop_migrations', 10) AS acquired");
         if ((int)($locked['acquired'] ?? 0) !== 1) {
@@ -21,7 +30,7 @@ final class Migrations
                 status VARCHAR(20) NOT NULL, completed_statements INT NOT NULL DEFAULT 0,
                 applied_at DATETIME NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-            foreach (glob(ROOT . '/database/migrations/*.php') as $file) {
+            foreach (glob(ROOT . '/database/legacy/*.php') as $file) {
                 $name = basename($file);
                 $checksum = hash_file('sha256', $file);
                 $existing = DB::one('SELECT * FROM migrations WHERE name=?',[$name]);
@@ -62,7 +71,7 @@ final class Migrations
     {
         $rows = [];
         $hasTrackingTable = in_array('migrations',self::existingTables(),true);
-        foreach (glob(ROOT . '/database/migrations/*.php') as $file) {
+        foreach (glob(ROOT . '/database/legacy/*.php') as $file) {
             $name = basename($file);
             $row = $hasTrackingTable ? DB::one('SELECT status,checksum FROM migrations WHERE name=?',[$name]) : null;
             $rows[] = ['name'=>$name,'status'=>$row['status'] ?? 'pending',
@@ -74,12 +83,12 @@ final class Migrations
     public static function tableNames(): array
     {
         $tables = [];
-        foreach (glob(ROOT . '/database/migrations/*.php') as $file) {
+        foreach (glob(ROOT . '/database/legacy/*.php') as $file) {
             $source = file_get_contents($file);
             preg_match_all('/CREATE TABLE IF NOT EXISTS\s+([a-z_][a-z0-9_]*)/i',$source,$matches);
             array_push($tables,...$matches[1]);
         }
-        return array_values(array_unique([...$tables,'migrations']));
+        return array_values(array_unique([...$tables,'migrations','laravel_migrations']));
     }
 
     public static function existingTables(): array

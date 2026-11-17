@@ -168,7 +168,7 @@ final class Documents
         $logoPath = $logo!=='' ? ROOT . '/storage/uploads/' . basename($logo) : null;
         $attachments = $type==='archive'?DB::all('SELECT * FROM files WHERE show_id=? AND mime<>? ORDER BY id',[$id,'application/pdf']):[];
         ob_start();
-        require ROOT . '/app/Views/pdf/document.php';
+        require ROOT . '/resources/views/pdf/document.php';
         $html = ob_get_clean();
         $options = new Options(['isRemoteEnabled'=>false,'isPhpEnabled'=>false,'isJavascriptEnabled'=>false,'chroot'=>ROOT . '/storage','defaultFont'=>'DejaVu Sans']);
         $pdf = new Dompdf($options);

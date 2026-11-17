@@ -22,7 +22,7 @@ final class OperationsController
         $show = Shows::find((int)$revision['show_id']);
         $lines = Orders::lines($id);
         $mode = Settings::get('pull_mode','barcode');
-        \view('operations/pull',compact('revision','show','lines','mode')+['title'=>'Pull ' . $revision['number'],'workspaceKey'=>'pull:' . $id]);
+        \shop_view('operations/pull',compact('revision','show','lines','mode')+['title'=>'Pull ' . $revision['number'],'workspaceKey'=>'pull:' . $id]);
     }
 
     public function pullSave(int $id): void
@@ -35,7 +35,7 @@ final class OperationsController
         $show = Shows::find($id);
         $lines = DB::all('SELECT i.id,i.name,COUNT(a.id) AS quantity FROM assignments a JOIN assets s ON s.id=a.asset_id JOIN item_types i ON i.id=s.item_type_id WHERE a.show_id=? AND a.ended_at IS NULL GROUP BY i.id,i.name ORDER BY i.name',[$id]);
         $mode = Settings::get('return_mode','barcode');
-        \view('operations/returns',compact('show','lines','mode')+['title'=>'Return ' . $show['name'],'workspaceKey'=>'return:' . $id]);
+        \shop_view('operations/returns',compact('show','lines','mode')+['title'=>'Return ' . $show['name'],'workspaceKey'=>'return:' . $id]);
     }
 
     public function returnSave(int $id): void
@@ -50,7 +50,7 @@ final class OperationsController
             (SELECT COUNT(*) FROM assignments a WHERE a.line_id=l.id) AS pulled
             FROM revision_lines l JOIN item_types i ON i.id=l.item_type_id JOIN revisions r ON r.id=l.revision_id JOIN revision_approvals ap ON ap.revision_id=r.id
             JOIN shop_orders o ON o.id=r.order_id JOIN shows s ON s.id=o.show_id WHERE ap.status IN ('Approved','Pending') AND s.id<>? AND s.status NOT IN ('Completed','Archived') ORDER BY s.name",[$id]);
-        \view('operations/transfer',compact('show','destinations')+['title'=>'Transfer from ' . $show['name'],'workspaceKey'=>'show:' . $id,'workspaceLabel'=>$show['name']]);
+        \shop_view('operations/transfer',compact('show','destinations')+['title'=>'Transfer from ' . $show['name'],'workspaceKey'=>'show:' . $id,'workspaceLabel'=>$show['name']]);
     }
 
     public function transferSave(int $id): void
@@ -66,7 +66,7 @@ final class OperationsController
         $repair = DB::one('SELECT r.*,a.asset_tag,i.name AS item_name,s.name AS show_name FROM repairs r JOIN assets a ON a.id=r.asset_id JOIN item_types i ON i.id=a.item_type_id LEFT JOIN shows s ON s.id=r.show_id WHERE r.id=?',[$id])
             ?? throw new HttpException(404,'Repair not found.');
         $history = DB::all("SELECT action,details,created_at FROM audit_logs WHERE entity_type='repair' AND entity_id=? ORDER BY id",[$id]);
-        \view('operations/repair',compact('repair','history')+['title'=>'Repair #' . $id,'workspaceKey'=>'repair:' . $id]);
+        \shop_view('operations/repair',compact('repair','history')+['title'=>'Repair #' . $id,'workspaceKey'=>'repair:' . $id]);
     }
 
     public function repairSave(int $id): void
@@ -79,7 +79,7 @@ final class OperationsController
     {
         $operation = DB::one('SELECT o.*,s.name AS show_name FROM operations o JOIN shows s ON s.id=o.show_id WHERE o.id=?',[$id]) ?? throw new HttpException(404,'Operation not found.');
         $events = DB::all('SELECT a.asset_tag,e.state,e.details,e.created_at FROM asset_events e JOIN assets a ON a.id=e.asset_id WHERE e.operation_id=? ORDER BY e.id',[$id]);
-        \view('operations/detail',compact('operation','events')+['title'=>$operation['type'] . ' #' . $id,'workspaceKey'=>'operation:' . $id]);
+        \shop_view('operations/detail',compact('operation','events')+['title'=>$operation['type'] . ' #' . $id,'workspaceKey'=>'operation:' . $id]);
     }
 
     public function note(int $id): void

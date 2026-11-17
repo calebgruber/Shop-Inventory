@@ -12,9 +12,9 @@ final class AuthController
     public function login(): void
     {
         if (Auth::user()) {
-            \redirect('/dashboard');
+            \shop_redirect('/dashboard');
         }
-        \view('auth/login', ['title'=>'Sign in'], false);
+        \shop_view('auth/login', ['title'=>'Sign in'], false);
     }
 
     public function password(): void
@@ -26,7 +26,7 @@ final class AuthController
 
     public function forgot(): void
     {
-        \view('auth/reset', ['reset'=>false], false);
+        \shop_view('auth/reset', ['reset'=>false], false);
     }
 
     public function requestReset(): void
@@ -42,7 +42,7 @@ final class AuthController
 
     public function resetForm(): void
     {
-        \view('auth/reset', ['reset'=>true], false);
+        \shop_view('auth/reset', ['reset'=>true], false);
     }
 
     public function reset(): void

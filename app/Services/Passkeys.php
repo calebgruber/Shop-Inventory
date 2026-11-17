@@ -18,7 +18,7 @@ final class Passkeys
         $library = self::library();
         if ($register) {
             $user = Auth::user();
-            if (!$user || time() - ($_SESSION['authenticated_at'] ?? 0) > 600) {
+            if (!$user || time() - session('authenticated_at',0) > 600) {
                 throw new HttpException(403, 'Sign in again before registering a passkey.');
             }
             $ids = array_column(DB::all('SELECT credential_id FROM passkeys WHERE user_id=? AND revoked_at IS NULL', [$user['id']]), 'credential_id');
@@ -27,10 +27,10 @@ final class Passkeys
             Auth::throttle('passkey');
             $options = $library->getGetArgs([], 120, true, true, true, true, true, 'required');
         }
-        $_SESSION['webauthn'] = [
+        session()->put('webauthn',[
             'challenge' => $library->getChallenge()->getBinaryString(), 'register' => $register,
             'user_id' => $register ? $user['id'] : null, 'expires' => time() + 120,
-        ];
+        ]);
         return json_decode(json_encode($options, JSON_THROW_ON_ERROR), true, 32, JSON_THROW_ON_ERROR);
     }
 
@@ -48,8 +48,7 @@ final class Passkeys
 
     public static function finish(array $data, bool $register): void
     {
-        $state = $_SESSION['webauthn'] ?? null;
-        unset($_SESSION['webauthn']);
+        $state = session()->pull('webauthn');
         if (!$state || $state['expires'] < time() || $state['register'] !== $register ||
             ($register && $state['user_id'] !== (Auth::user()['id'] ?? null))) {
             throw new HttpException(422, 'The passkey request expired. Please try again.');

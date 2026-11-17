@@ -21,8 +21,7 @@ final class Permissions
         if ($permission === 'authenticated') {
             return $user !== null;
         }
-        $permissions = self::ROLES[$user['role'] ?? ''] ?? [];
-        return in_array('*', $permissions, true) || in_array($permission, $permissions, true);
+        return $user!==null && \Illuminate\Support\Facades\Gate::allows($permission);
     }
 
     public static function require(string $permission): void

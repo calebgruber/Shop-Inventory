@@ -9,83 +9,83 @@ use App\Controllers\SettingsController;
 use App\Controllers\ReportsController;
 use App\Controllers\SetupController;
 
-$setup = new SetupController();
-$router->add('GET','/setup',[$setup,'show']);
-$router->add('POST','/setup',[$setup,'install']);
+$setup = SetupController::class;
+shop_route('GET','/setup',[$setup,'show']);
+shop_route('POST','/setup',[$setup,'install']);
 
-$auth = new AuthController();
-$workspace = new WorkspaceController();
-$inventory = new InventoryController();
-$operations = new OperationsController();
-$settings = new SettingsController();
-$reports = new ReportsController();
+$auth = AuthController::class;
+$workspace = WorkspaceController::class;
+$inventory = InventoryController::class;
+$operations = OperationsController::class;
+$settings = SettingsController::class;
+$reports = ReportsController::class;
 
-$router->add('GET','/',fn() => redirect('/dashboard'));
-$router->add('GET','/login',[$auth,'login']);
-$router->add('POST','/login',[$auth,'password']);
-$router->add('GET','/forgot-password',[$auth,'forgot']);
-$router->add('POST','/forgot-password',[$auth,'requestReset']);
-$router->add('GET','/reset-password',[$auth,'resetForm']);
-$router->add('POST','/reset-password',[$auth,'reset']);
-$router->add('POST','/passkeys/login/begin',fn() => $auth->passkeyBegin(false));
-$router->add('POST','/passkeys/login/finish',fn() => $auth->passkeyFinish(false));
-$router->add('POST','/passkeys/register/begin',fn() => $auth->passkeyBegin(true),'authenticated');
-$router->add('POST','/passkeys/register/finish',fn() => $auth->passkeyFinish(true),'authenticated');
-$router->add('POST','/passkeys/{id}/revoke',[$settings,'revokeKey'],'authenticated');
-$router->add('POST','/logout',function (): void { App\Services\Auth::logout(); json_response(['redirect'=>'/login']); },'authenticated');
+shop_route('GET','/',fn() => shop_redirect('/dashboard'));
+shop_route('GET','/login',[$auth,'login']);
+shop_route('POST','/login',[$auth,'password']);
+shop_route('GET','/forgot-password',[$auth,'forgot']);
+shop_route('POST','/forgot-password',[$auth,'requestReset']);
+shop_route('GET','/reset-password',[$auth,'resetForm']);
+shop_route('POST','/reset-password',[$auth,'reset']);
+shop_route('POST','/passkeys/login/begin',fn() => app($auth)->passkeyBegin(false));
+shop_route('POST','/passkeys/login/finish',fn() => app($auth)->passkeyFinish(false));
+shop_route('POST','/passkeys/register/begin',fn() => app($auth)->passkeyBegin(true),'authenticated');
+shop_route('POST','/passkeys/register/finish',fn() => app($auth)->passkeyFinish(true),'authenticated');
+shop_route('POST','/passkeys/{id}/revoke',[$settings,'revokeKey'],'authenticated');
+shop_route('POST','/logout',function (): void { App\Services\Auth::logout(); json_response(['redirect'=>'/login']); },'authenticated');
 
-$router->add('GET','/dashboard',[$workspace,'dashboard'],'shows.view');
-$router->add('GET','/shows',fn() => $workspace->listing('shows','Shows'),'shows.view');
-$router->add('GET','/shows/add',fn() => $workspace->showForm(),'shows.edit');
-$router->add('POST','/shows/add',fn() => $workspace->showSave(),'shows.edit');
-$router->add('GET','/shows/{id}',[$workspace,'show'],'shows.view');
-$router->add('GET','/shows/{id}/edit',[$workspace,'showForm'],'shows.edit');
-$router->add('POST','/shows/{id}/edit',[$workspace,'showSave'],'shows.edit');
+shop_route('GET','/dashboard',[$workspace,'dashboard'],'shows.view');
+shop_route('GET','/shows',fn() => app($workspace)->listing('shows','Shows'),'shows.view');
+shop_route('GET','/shows/add',fn() => app($workspace)->showForm(),'shows.edit');
+shop_route('POST','/shows/add',fn() => app($workspace)->showSave(),'shows.edit');
+shop_route('GET','/shows/{id}',[$workspace,'show'],'shows.view');
+shop_route('GET','/shows/{id}/edit',[$workspace,'showForm'],'shows.edit');
+shop_route('POST','/shows/{id}/edit',[$workspace,'showSave'],'shows.edit');
 foreach (['overview','orders','revisions','pulls','returns','repairs','files','history','timeline','notes'] as $tab) {
-    $router->add('GET','/shows/{id}/' . $tab,fn(int $id) => $workspace->show($id,$tab),'shows.view');
+    shop_route('GET','/shows/{id}/' . $tab,fn(int $id) => app($workspace)->show($id,$tab),'shows.view');
 }
-$router->add('GET','/shows/{id}/orders/add',fn(int $id) => $workspace->orderForm($id),'orders.edit');
-$router->add('POST','/shows/{id}/orders/add',fn(int $id) => $workspace->orderSave($id),'orders.edit');
-$router->add('GET','/shows/{id}/orders/{order}/revisions/add',[$workspace,'orderForm'],'orders.edit');
-$router->add('POST','/shows/{id}/orders/{order}/revisions/add',[$workspace,'orderSave'],'orders.edit');
-$router->add('POST','/shows/{id}/notes',[$operations,'note'],'shows.edit');
-$router->add('POST','/shows/{id}/files',[$operations,'file'],'shows.edit');
-$router->add('GET','/orders',fn() => $workspace->listing('revisions','Shop Orders & Revisions'),'shows.view');
-$router->add('GET','/orders/{id}',[$workspace,'order'],'shows.view');
-$router->add('GET','/revisions/{id}',[$workspace,'revision'],'shows.view');
-$router->add('POST','/revisions/{id}/approval',function (int $id): void {
+shop_route('GET','/shows/{id}/orders/add',fn(int $id) => app($workspace)->orderForm($id),'orders.edit');
+shop_route('POST','/shows/{id}/orders/add',fn(int $id) => app($workspace)->orderSave($id),'orders.edit');
+shop_route('GET','/shows/{id}/orders/{order}/revisions/add',[$workspace,'orderForm'],'orders.edit');
+shop_route('POST','/shows/{id}/orders/{order}/revisions/add',[$workspace,'orderSave'],'orders.edit');
+shop_route('POST','/shows/{id}/notes',[$operations,'note'],'shows.edit');
+shop_route('POST','/shows/{id}/files',[$operations,'file'],'shows.edit');
+shop_route('GET','/orders',fn() => app($workspace)->listing('revisions','Shop Orders & Revisions'),'shows.view');
+shop_route('GET','/orders/{id}',[$workspace,'order'],'shows.view');
+shop_route('GET','/revisions/{id}',[$workspace,'revision'],'shows.view');
+shop_route('POST','/revisions/{id}/approval',function (int $id): void {
     App\Services\Orders::approve($id,App\Services\Validation::choice(input()['status'] ?? '',['Approved','Rejected'],'approval'));
     json_response(['redirect'=>'/revisions/' . $id]);
 },'orders.approve');
-$router->add('GET','/revisions/{id}/pull',[$operations,'pull'],'pulls.edit');
-$router->add('POST','/revisions/{id}/pull',[$operations,'pullSave'],'pulls.edit');
-$router->add('GET','/shows/{id}/return',[$operations,'returns'],'returns.edit');
-$router->add('POST','/shows/{id}/return',[$operations,'returnSave'],'returns.edit');
-$router->add('GET','/shows/{id}/transfer',[$operations,'transfer'],'transfers.edit');
-$router->add('POST','/shows/{id}/transfer',[$operations,'transferSave'],'transfers.edit');
-$router->add('GET','/operations/{id}',[$operations,'operation'],'shows.view');
+shop_route('GET','/revisions/{id}/pull',[$operations,'pull'],'pulls.edit');
+shop_route('POST','/revisions/{id}/pull',[$operations,'pullSave'],'pulls.edit');
+shop_route('GET','/shows/{id}/return',[$operations,'returns'],'returns.edit');
+shop_route('POST','/shows/{id}/return',[$operations,'returnSave'],'returns.edit');
+shop_route('GET','/shows/{id}/transfer',[$operations,'transfer'],'transfers.edit');
+shop_route('POST','/shows/{id}/transfer',[$operations,'transferSave'],'transfers.edit');
+shop_route('GET','/operations/{id}',[$operations,'operation'],'shows.view');
 
-$router->add('GET','/inventory',fn() => $workspace->listing('assets','Serialized Inventory'),'inventory.view');
-$router->add('GET','/inventory/categories',[$inventory,'categories'],'inventory.view');
-$router->add('GET','/inventory/packages',fn() => $workspace->listing('packages','Equipment Packages'),'inventory.view');
-$router->add('GET','/inventory/rules',fn() => $workspace->listing('rules','Equipment Rules'),'inventory.view');
+shop_route('GET','/inventory',fn() => app($workspace)->listing('assets','Serialized Inventory'),'inventory.view');
+shop_route('GET','/inventory/categories',[$inventory,'categories'],'inventory.view');
+shop_route('GET','/inventory/packages',fn() => app($workspace)->listing('packages','Equipment Packages'),'inventory.view');
+shop_route('GET','/inventory/rules',fn() => app($workspace)->listing('rules','Equipment Rules'),'inventory.view');
 foreach (['category','item-type','package','rule'] as $resource) {
-    $router->add('GET','/inventory/' . $resource . '/add',fn() => $inventory->form($resource),'inventory.edit');
-    $router->add('POST','/inventory/' . $resource . '/add',fn() => $inventory->save($resource),'inventory.edit');
+    shop_route('GET','/inventory/' . $resource . '/add',fn() => app($inventory)->form($resource),'inventory.edit');
+    shop_route('POST','/inventory/' . $resource . '/add',fn() => app($inventory)->save($resource),'inventory.edit');
 }
 foreach (['category','item-type'] as $resource) {
-    $router->add('GET','/inventory/' . $resource . '/{id}/edit',fn(int $id) => $inventory->form($resource,$id),'inventory.edit');
-    $router->add('POST','/inventory/' . $resource . '/{id}/edit',fn(int $id) => $inventory->save($resource,$id),'inventory.edit');
-    $router->add('POST','/inventory/' . $resource . '/{id}/delete',function (int $id) use ($resource): void {
+    shop_route('GET','/inventory/' . $resource . '/{id}/edit',fn(int $id) => app($inventory)->form($resource,$id),'inventory.edit');
+    shop_route('POST','/inventory/' . $resource . '/{id}/edit',fn(int $id) => app($inventory)->save($resource,$id),'inventory.edit');
+    shop_route('POST','/inventory/' . $resource . '/{id}/delete',function (int $id) use ($resource): void {
         App\Services\Inventory::remove($resource,$id);
         json_response(['redirect'=>'/inventory/categories']);
     },'inventory.edit');
 }
-$router->add('POST','/inventory/assets/{id}/action',function (int $id): void {
+shop_route('POST','/inventory/assets/{id}/action',function (int $id): void {
     App\Services\Inventory::assetAction($id,input());
     json_response(['redirect'=>'/inventory/assets/' . $id]);
 },'inventory.edit');
-$router->add('POST','/inventory/rules/{id}/status',function (int $id): void {
+shop_route('POST','/inventory/rules/{id}/status',function (int $id): void {
     $active = App\Services\Validation::choice((string)(input()['active'] ?? ''),['0','1'],'rule status');
     App\Models\Database::transaction(function () use ($id,$active): void {
         $rule = App\Models\Database::one('SELECT * FROM equipment_rules WHERE id=? FOR UPDATE',[$id]) ?? throw new App\Services\HttpException(404,'Rule not found.');
@@ -95,37 +95,37 @@ $router->add('POST','/inventory/rules/{id}/status',function (int $id): void {
     });
     json_response(['redirect'=>'/inventory/rules']);
 },'inventory.edit');
-$router->add('GET','/inventory/import',[$inventory,'importForm'],'inventory.edit');
-$router->add('POST','/inventory/import',[$inventory,'import'],'inventory.edit');
-$router->add('POST','/inventory/reorder',function (): void { App\Services\Inventory::reorder(input()); json_response(['message'=>'Order saved.']); },'inventory.edit');
-$router->add('GET','/inventory/assets/{id}',[$inventory,'asset'],'inventory.view');
-$router->add('GET','/inventory/packages/{id}',[$inventory,'package'],'inventory.view');
-$router->add('GET','/repairs',fn() => $workspace->listing('repairs','Repair Bench'),'reports.view');
-$router->add('GET','/repairs/{id}',[$operations,'repair'],'reports.view');
-$router->add('POST','/repairs/{id}',[$operations,'repairSave'],'repairs.edit');
+shop_route('GET','/inventory/import',[$inventory,'importForm'],'inventory.edit');
+shop_route('POST','/inventory/import',[$inventory,'import'],'inventory.edit');
+shop_route('POST','/inventory/reorder',function (): void { App\Services\Inventory::reorder(input()); json_response(['message'=>'Order saved.']); },'inventory.edit');
+shop_route('GET','/inventory/assets/{id}',[$inventory,'asset'],'inventory.view');
+shop_route('GET','/inventory/packages/{id}',[$inventory,'package'],'inventory.view');
+shop_route('GET','/repairs',fn() => app($workspace)->listing('repairs','Repair Bench'),'reports.view');
+shop_route('GET','/repairs/{id}',[$operations,'repair'],'reports.view');
+shop_route('POST','/repairs/{id}',[$operations,'repairSave'],'repairs.edit');
 
-$router->add('GET','/reports',[$reports,'index'],'reports.view');
-$router->add('GET','/reports/timeline',[$reports,'timeline'],'reports.view');
-$router->add('GET','/api/timeline',[$reports,'timelineData'],'reports.view');
-$router->add('POST','/reports/generate',[$reports,'generate'],'reports.view');
-$router->add('GET','/documents/{id}',[$reports,'download'],'reports.view');
-$router->add('GET','/files/{id}',[$reports,'file'],'shows.view');
-$router->add('GET','/settings',[$settings,'index'],'settings.edit');
-$router->add('POST','/settings',[$settings,'save'],'settings.edit');
+shop_route('GET','/reports',[$reports,'index'],'reports.view');
+shop_route('GET','/reports/timeline',[$reports,'timeline'],'reports.view');
+shop_route('GET','/api/timeline',[$reports,'timelineData'],'reports.view');
+shop_route('POST','/reports/generate',[$reports,'generate'],'reports.view');
+shop_route('GET','/documents/{id}',[$reports,'download'],'reports.view');
+shop_route('GET','/files/{id}',[$reports,'file'],'shows.view');
+shop_route('GET','/settings',[$settings,'index'],'settings.edit');
+shop_route('POST','/settings',[$settings,'save'],'settings.edit');
 foreach (SettingsController::BRANDING as $key) {
-    $router->add('GET','/branding/' . $key,fn() => $settings->branding($key));
+    shop_route('GET','/branding/' . $key,fn() => app($settings)->branding($key));
 }
-$router->add('GET','/profile',[$settings,'profile'],'authenticated');
-$router->add('POST','/profile/avatar',[$settings,'regenerate'],'authenticated');
-$router->add('POST','/profile/password',[$settings,'password'],'authenticated');
-$router->add('GET','/avatars/{id}',[$settings,'avatar'],'authenticated');
-$router->add('GET','/users',fn() => $workspace->listing('users','Shop Users'),'users.view');
-$router->add('GET','/users/add',fn() => $settings->userForm(),'users.edit');
-$router->add('POST','/users/add',fn() => $settings->userSave(),'users.edit');
-$router->add('GET','/users/{id}',[$settings,'userForm'],'users.edit');
-$router->add('POST','/users/{id}',[$settings,'userSave'],'users.edit');
-$router->add('GET','/api/table',[$workspace,'table'],'authenticated');
-$router->add('GET','/api/search',[$workspace,'search'],'authenticated');
-$router->add('POST','/api/workspaces',[$workspace,'workspaceSave'],'authenticated');
-$router->add('GET','/api/views',[$workspace,'savedViews'],'authenticated');
-$router->add('POST','/api/views',[$workspace,'saveView'],'authenticated');
+shop_route('GET','/profile',[$settings,'profile'],'authenticated');
+shop_route('POST','/profile/avatar',[$settings,'regenerate'],'authenticated');
+shop_route('POST','/profile/password',[$settings,'password'],'authenticated');
+shop_route('GET','/avatars/{id}',[$settings,'avatar'],'authenticated');
+shop_route('GET','/users',fn() => app($workspace)->listing('users','Shop Users'),'users.view');
+shop_route('GET','/users/add',fn() => app($settings)->userForm(),'users.edit');
+shop_route('POST','/users/add',fn() => app($settings)->userSave(),'users.edit');
+shop_route('GET','/users/{id}',[$settings,'userForm'],'users.edit');
+shop_route('POST','/users/{id}',[$settings,'userSave'],'users.edit');
+shop_route('GET','/api/table',[$workspace,'table'],'authenticated');
+shop_route('GET','/api/search',[$workspace,'search'],'authenticated');
+shop_route('POST','/api/workspaces',[$workspace,'workspaceSave'],'authenticated');
+shop_route('GET','/api/views',[$workspace,'savedViews'],'authenticated');
+shop_route('POST','/api/views',[$workspace,'saveView'],'authenticated');

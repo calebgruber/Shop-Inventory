@@ -10,7 +10,7 @@ final class Audit
     {
         DB::execute(
             'INSERT INTO audit_logs (user_id,action,entity_type,entity_id,details,ip_address) VALUES (?,?,?,?,?,?)',
-            [$_SESSION['user_id'] ?? null, $action, $type, $id, json_encode($details, JSON_THROW_ON_ERROR),
+            [session('user_id'), $action, $type, $id, json_encode($details, JSON_THROW_ON_ERROR),
                 $_SERVER['REMOTE_ADDR'] ?? 'cli']
         );
     }

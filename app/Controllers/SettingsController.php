@@ -19,7 +19,7 @@ final class SettingsController
     public function index(): void
     {
         $settings = Settings::all();
-        \view('settings/index',compact('settings')+['title'=>'Shop Settings','workspaceKey'=>'settings']);
+        \shop_view('settings/index',compact('settings')+['title'=>'Shop Settings','workspaceKey'=>'settings']);
     }
 
     public function save(): void
@@ -65,23 +65,24 @@ final class SettingsController
         if ($name==='' || !is_file($path)) {
             throw new HttpException(404,'No branding image configured.');
         }
-        header('Content-Type: ' . (new \finfo(FILEINFO_MIME_TYPE))->file($path));
-        header('Content-Disposition: inline');
-        readfile($path);
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->file($path,['Content-Type'=>(new \finfo(FILEINFO_MIME_TYPE))->file($path)])
+        );
     }
 
     public function profile(): void
     {
         $user = Auth::user();
         $keys = DB::all('SELECT id,label,created_at FROM passkeys WHERE user_id=? AND revoked_at IS NULL',[$user['id']]);
-        \view('settings/profile',compact('user','keys')+['title'=>'My Profile','workspaceKey'=>'profile']);
+        \shop_view('settings/profile',compact('user','keys')+['title'=>'My Profile','workspaceKey'=>'profile']);
     }
 
     public function avatar(int $id): void
     {
         $user = DB::one('SELECT avatar_seed FROM users WHERE id=? AND active=1',[$id]) ?? throw new HttpException(404,'User not found.');
-        header('Content-Type: image/svg+xml; charset=utf-8');
-        echo Avatar::svg($user['avatar_seed']);
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response(Avatar::svg($user['avatar_seed']),200,['Content-Type'=>'image/svg+xml; charset=utf-8'])
+        );
     }
 
     public function regenerate(): void
@@ -95,7 +96,7 @@ final class SettingsController
 
     public function revokeKey(int $id): void
     {
-        if (time()-($_SESSION['authenticated_at'] ?? 0)>600) {
+        if (time()-session('authenticated_at',0)>600) {
             throw new HttpException(403,'Sign in again to manage passkeys.');
         }
         DB::transaction(function () use ($id): void {
@@ -129,7 +130,7 @@ final class SettingsController
         if ($id && !$record) {
             throw new HttpException(404,'User not found.');
         }
-        \view('settings/user',compact('record')+['title'=>$id?'User: ' . $record['name']:'Create User','workspaceKey'=>$id?'user:' . $id:'new-user']);
+        \shop_view('settings/user',compact('record')+['title'=>$id?'User: ' . $record['name']:'Create User','workspaceKey'=>$id?'user:' . $id:'new-user']);
     }
 
     public function userSave(?int $id = null): void

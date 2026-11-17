@@ -39,25 +39,25 @@ final class WorkspaceController
         $widgets[] = ['Inventory Shortages',count($shortages),'/reports/timeline','error'];
         $activity = DB::all('SELECT a.action,a.created_at,u.name AS user_name FROM audit_logs a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.id DESC LIMIT 12');
         $upcoming = DB::all("SELECT id,name,theatre,prep_start,status FROM shows WHERE status NOT IN ('Completed','Archived') ORDER BY prep_start LIMIT 6");
-        \view('dashboard',compact('widgets','shortages','activity','upcoming')+['title'=>'Dashboard','workspaceKey'=>'dashboard']);
+        \shop_view('dashboard',compact('widgets','shortages','activity','upcoming')+['title'=>'Dashboard','workspaceKey'=>'dashboard']);
     }
 
     public function listing(string $resource, string $title): void
     {
-        \view('listing',['resource'=>$resource,'title'=>$title,'workspaceKey'=>$resource]);
+        \shop_view('listing',['resource'=>$resource,'title'=>$title,'workspaceKey'=>$resource]);
     }
 
     public function show(int $id, string $tab = 'overview'): void
     {
         $show = Shows::find($id);
         $resource = match($tab) {'orders','revisions'=>'revisions','pulls','returns'=>'operations','repairs'=>'repairs','files'=>'files','history'=>'history','notes'=>'notes',default=>null};
-        \view('shows/workspace',compact('show','tab','resource')+['title'=>$show['name'],'workspaceKey'=>'show:' . $id]);
+        \shop_view('shows/workspace',compact('show','tab','resource')+['title'=>$show['name'],'workspaceKey'=>'show:' . $id]);
     }
 
     public function showForm(?int $id = null): void
     {
         $show = $id?Shows::find($id):null;
-        \view('shows/form',compact('show')+['title'=>$show?'Edit ' . $show['name']:'Add Show','workspaceKey'=>$show?'show:' . $id:'new-show','workspaceLabel'=>$show['name'] ?? 'Add Show']);
+        \shop_view('shows/form',compact('show')+['title'=>$show?'Edit ' . $show['name']:'Add Show','workspaceKey'=>$show?'show:' . $id:'new-show','workspaceLabel'=>$show['name'] ?? 'Add Show']);
     }
 
     public function showSave(?int $id = null): void
@@ -72,13 +72,13 @@ final class WorkspaceController
         $show = Shows::find((int)$revision['show_id']);
         $lines = Orders::lines($id);
         $issues = Planning::validate($lines,$id);
-        \view('orders/revision',compact('revision','show','lines','issues')+['title'=>$revision['number'] . ' R' . $revision['revision_number'],'workspaceKey'=>'revision:' . $id]);
+        \shop_view('orders/revision',compact('revision','show','lines','issues')+['title'=>$revision['number'] . ' R' . $revision['revision_number'],'workspaceKey'=>'revision:' . $id]);
     }
 
     public function order(int $id): void
     {
         $order = DB::one('SELECT o.*,s.name AS show_name FROM shop_orders o JOIN shows s ON s.id=o.show_id WHERE o.id=?',[$id]) ?? throw new HttpException(404,'Shop order not found.');
-        \view('orders/order',compact('order')+['resource'=>'revisions','title'=>$order['number'],'workspaceKey'=>'order:' . $id]);
+        \shop_view('orders/order',compact('order')+['resource'=>'revisions','title'=>$order['number'],'workspaceKey'=>'order:' . $id]);
     }
 
     public function orderForm(int $showId, ?int $orderId = null): void
@@ -90,7 +90,7 @@ final class WorkspaceController
         }
         $types = DB::all('SELECT id,name FROM item_types ORDER BY name');
         $packages = DB::all('SELECT id,name FROM packages ORDER BY name');
-        \view('orders/form',compact('show','orderId','types','packages')+['title'=>$orderId?'Add Revision':'Add Shop Order','workspaceKey'=>'show:' . $showId,'workspaceLabel'=>$show['name']]);
+        \shop_view('orders/form',compact('show','orderId','types','packages')+['title'=>$orderId?'Add Revision':'Add Shop Order','workspaceKey'=>'show:' . $showId,'workspaceLabel'=>$show['name']]);
     }
 
     public function orderSave(int $showId, ?int $orderId = null): void

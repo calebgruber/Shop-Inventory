@@ -1,16 +1,17 @@
 <?php
-declare(strict_types=1);
+
+$shop = require __DIR__ . '/shop.php';
 
 return [
-    'name' => 'Theatre Shop',
-    'url' => 'https://shop.example.edu',
-    'environment' => 'production',
-    'timezone' => 'UTC',
-    'database' => [
-        'host' => 'localhost', 'port' => 3306, 'name' => 'theatre_shop',
-        'username' => '', 'password' => '',
-    ],
-    'mail_from' => 'shop@example.edu',
-    'session_idle_seconds' => 1800,
-    'session_absolute_seconds' => 28800,
+    'name'=>$shop['name'],
+    'env'=>$shop['environment'],
+    'debug'=>(bool)env('APP_DEBUG',false),
+    'url'=>$shop['url'],
+    'timezone'=>'UTC',
+    'locale'=>'en',
+    'fallback_locale'=>'en',
+    'faker_locale'=>'en_US',
+    'key'=>env('APP_KEY') ?: \App\Services\InstallationKey::get(),
+    'cipher'=>'AES-256-CBC',
+    'maintenance'=>['driver'=>'file'],
 ];
