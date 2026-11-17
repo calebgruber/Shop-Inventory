@@ -90,7 +90,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
 .page-actions, .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .section-actions { margin-bottom: 26px; }
 .working-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--shop-border); margin: 0 0 38px; overflow-x: auto; }
-.working-tabs a { display: block; padding: 14px 20px; border-radius: 5px 5px 0 0; border-top: 4px solid var(--shop-accent); background: var(--shop-tab); color: var(--shop-muted); white-space: nowrap; font-weight: 600; }
+.working-tabs a { display: inline-flex; align-items: center; gap: 7px; padding: 14px 18px; border-radius: 5px 5px 0 0; border-top: 4px solid var(--shop-accent); background: var(--shop-tab); color: var(--shop-muted); white-space: nowrap; font-weight: 600; }
+.working-tabs a > .material-symbols-rounded { color: var(--shop-accent); font-size: 19px; line-height: 1; }
 .working-tabs a.active { background: var(--shop-surface); color: var(--shop-text); box-shadow: inset 0 -2px var(--shop-surface); }
 .working-tabs a:hover { color: var(--shop-text); text-decoration: none; }
 .card.floating-card { position: relative; background: var(--shop-surface); border: 1px solid var(--shop-border); border-left: 5px solid var(--shop-accent); border-radius: 8px; box-shadow: var(--shop-shadow); margin: 16px 0 30px; min-width: 0; }

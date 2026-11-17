@@ -50,7 +50,7 @@ final class WorkspaceController
     public function show(int $id, string $tab = 'overview'): void
     {
         $show = Shows::find($id);
-        $resource = match($tab) {'orders','revisions'=>'revisions','pulls','returns'=>'operations','repairs'=>'repairs','files'=>'files','history'=>'history','notes'=>'notes',default=>null};
+        $resource = match($tab) {'orders','revisions'=>'revisions','pulls','returns'=>'operations','files'=>'files','history'=>'history','notes'=>'notes',default=>null};
         \shop_view('shows/workspace',compact('show','tab','resource')+['title'=>$show['name'],'workspaceKey'=>'show:' . $id]);
     }
 
@@ -72,13 +72,13 @@ final class WorkspaceController
         $show = Shows::find((int)$revision['show_id']);
         $lines = Orders::lines($id);
         $issues = Planning::validate($lines,$id);
-        \shop_view('orders/revision',compact('revision','show','lines','issues')+['title'=>$revision['number'] . ' R' . $revision['revision_number'],'workspaceKey'=>'revision:' . $id]);
+        \shop_view('orders/revision',compact('revision','show','lines','issues')+['title'=>$revision['number'] . ' R' . $revision['revision_number'],'workspaceKey'=>'show:' . $show['id'],'workspaceLabel'=>$show['name']]);
     }
 
     public function order(int $id): void
     {
         $order = DB::one('SELECT o.*,s.name AS show_name FROM shop_orders o JOIN shows s ON s.id=o.show_id WHERE o.id=?',[$id]) ?? throw new HttpException(404,'Shop order not found.');
-        \shop_view('orders/order',compact('order')+['resource'=>'revisions','title'=>$order['number'],'workspaceKey'=>'order:' . $id]);
+        \shop_view('orders/order',compact('order')+['resource'=>'revisions','title'=>$order['number'],'workspaceKey'=>'show:' . $order['show_id'],'workspaceLabel'=>$order['show_name']]);
     }
 
     public function orderForm(int $showId, ?int $orderId = null): void
@@ -112,10 +112,13 @@ final class WorkspaceController
         }
         $clean = [];
         foreach ($tabs as $tab) {
-            if (!is_array($tab) || !preg_match('#^/(?:dashboard|shows|orders|revisions|inventory|repairs|reports|settings|profile|users|operations)(?:/[a-z0-9/-]+)?$#D',$tab['url'] ?? '')) {
+            $key = is_array($tab)?($tab['key'] ?? null):null;
+            $url = is_array($tab)?($tab['url'] ?? null):null;
+            if (!is_string($key) || !is_string($url) || !preg_match('/^show:(\d+)$/D',$key,$keyMatch) ||
+                !preg_match('#^/(?:shows/' . preg_quote($keyMatch[1],'#') . '(?:/[a-z0-9/-]+)?|revisions/\d+(?:/pull)?|orders/\d+|operations/\d+)(?:\?[a-z0-9_=&%-]+)?$#D',$url)) {
                 throw new HttpException(422,'Invalid workspace URL.');
             }
-            $clean[] = ['key'=>Validation::text($tab['key'] ?? '', 'Workspace key',100),'label'=>Validation::text($tab['label'] ?? '', 'Workspace label',200),'url'=>$tab['url']];
+            $clean[] = ['key'=>Validation::text($key, 'Workspace key',100),'label'=>Validation::text($tab['label'] ?? '', 'Workspace label',200),'url'=>$url];
         }
         DB::execute('INSERT INTO user_workspaces(user_id,tabs) VALUES (?,?) ON DUPLICATE KEY UPDATE tabs=VALUES(tabs)',
             [Auth::user()['id'],json_encode($clean,JSON_THROW_ON_ERROR)]);

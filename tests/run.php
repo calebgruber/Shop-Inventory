@@ -70,6 +70,36 @@ test('CSV headers and pasted serials parse',function (): void {
     same([['asset_tag'=>'S4-0001','serial_number'=>'SN-123']],Inventory::parseImport("asset_tag,serial_number\nS4-0001,SN-123",'csv'));
     same([['asset_tag'=>'','serial_number'=>'SN-1'],['asset_tag'=>'','serial_number'=>'SN-2']],Inventory::parseImport("SN-1\nSN-2",'text'));
 });
+test('Lighting catalog CSV parses quoted fields, smart punctuation, duplicates, and empty quantities',function (): void {
+    $csv = "category,name,shop_quantity,unit,default_note,description\n"
+        . "FIXTURES,\"PAR 16 Birdies (Edison, 70W MFL)\",18,ea,.,.\n"
+        . "FIXTURES,\"PAR 16 Birdies (Edison, 70W MFL)\",2,ea,.,.\n"
+        . "LED TAPE,RGBW LED Tape,,ea,,\n"
+        . "POWER CABLE,,,ea,,\n"
+        . "POWER CABLE,Blank zero item,0,ea,,\n";
+    $parsed = Inventory::parseCatalog($csv);
+    same(4,$parsed['row_count']);
+    same(20,$parsed['asset_count']);
+    same(3,count($parsed['rows']));
+    same(['category'=>'Lighting','subcategory'=>'FIXTURES','name'=>'PAR 16 Birdies (Edison, 70W MFL)','sku'=>'','shop_quantity'=>20,'unit'=>'ea','default_note'=>'','description'=>''],$parsed['rows'][0]);
+    same(0,$parsed['rows'][1]['shop_quantity']);
+    same('Blank zero item',$parsed['rows'][2]['name']);
+});
+test('Sound catalog CSV distinguishes duplicate category headers and preserves SKU metadata',function (): void {
+    $csv = "category,category,name,sku,shop_quantity,unit,default_note,description\n"
+        . "Console,CONSOLE,QL5,100001,1,ea,,\n"
+        . "Signal-XLR,SIGNAL-XLR,\"XLR, 5′\",200002,16,ea,,\n";
+    $parsed = Inventory::parseCatalog($csv);
+    same(2,$parsed['row_count']);
+    same(['category'=>'Console','subcategory'=>'CONSOLE','name'=>'QL5','sku'=>'100001','shop_quantity'=>1,'unit'=>'ea','default_note'=>'','description'=>''],$parsed['rows'][0]);
+    same('XLR, 5′',$parsed['rows'][1]['name']);
+    same('SIGNAL-XLR',$parsed['rows'][1]['subcategory']);
+});
+test('Catalog CSV rejects malformed rows and quantities',function (): void {
+    rejects(fn() => Inventory::parseCatalog("category,name,shop_quantity,unit,default_note,description\nFIXTURES,Source Four,1.5,ea,,"));
+    rejects(fn() => Inventory::parseCatalog("category,category,name,sku,shop_quantity,unit,default_note,description\nConsole,,QL5,100001,1,ea,,"));
+    rejects(fn() => Inventory::parseCatalog("category,name,shop_quantity,unit,default_note,description\nFIXTURES,Source Four,1,ea,"));
+});
 test('Password hashing uses Argon2id',function (): void {
     $hash = Auth::password('a-long-test-password');
     same('argon2id',password_get_info($hash)['algoName']);
@@ -130,6 +160,45 @@ if (in_array('--integration',$argv,true)) {
     $subcategory = Inventory::folder(['name'=>'Fixtures','parent_id'=>$category]);
     $fixture = Inventory::itemType(['name'=>'Source Four','folder_id'=>$subcategory,'prefix'=>'S4']);
     $accessory = Inventory::itemType(['name'=>'Safety Cable','folder_id'=>$subcategory,'prefix'=>'SAFE']);
+    test('Catalog import creates serialized assets with category metadata and rejects exact re-import',function (): void {
+        $csv = "category,category,name,sku,shop_quantity,unit,default_note,description\n"
+            . "Audio,CONSOLE,QL5,100001,2,ea,Handle with care,Digital console\n";
+        $result = Inventory::importCatalog($csv);
+        same(1,$result['created_item_types']);
+        same(2,$result['assets_added']);
+        $type = DB::one("SELECT i.*,f.name AS subcategory,p.name AS category FROM item_types i JOIN folders f ON f.id=i.folder_id JOIN folders p ON p.id=f.parent_id WHERE i.sku='100001'");
+        same('Audio',$type['category']);
+        same('CONSOLE',$type['subcategory']);
+        same('Handle with care',$type['default_note']);
+        same('Digital console',$type['description']);
+        same(2,(int)DB::one('SELECT COUNT(*) AS total FROM assets WHERE item_type_id=?',[$type['id']])['total']);
+        same(true,(bool)DB::one("SELECT id FROM asset_events WHERE asset_id=(SELECT id FROM assets WHERE item_type_id=? LIMIT 1) AND state='Available'",[$type['id']]));
+        rejects(fn() => Inventory::importCatalog($csv),409);
+        same(2,(int)DB::one('SELECT COUNT(*) AS total FROM assets WHERE item_type_id=?',[$type['id']])['total']);
+    });
+    test('Catalog asset-tag conflicts roll back every record in the import',function () use ($accessory): void {
+        DB::insert("INSERT INTO assets(item_type_id,asset_tag,state) VALUES (?,?,'Repair')",[$accessory,'CATALOG-CONFLICT-0001']);
+        $before = [
+            (int)DB::one('SELECT COUNT(*) AS total FROM folders')['total'],
+            (int)DB::one('SELECT COUNT(*) AS total FROM item_types')['total'],
+            (int)DB::one('SELECT COUNT(*) AS total FROM assets')['total'],
+            (int)DB::one('SELECT COUNT(*) AS total FROM inventory_imports')['total'],
+        ];
+        $collisionCsv = "category,category,name,sku,shop_quantity,unit,default_note,description\n"
+            . "Rollback,Test,First,ROLLBACK-OK,1,ea,,\n"
+            . "Rollback,Test,Second,CATALOG-CONFLICT,1,ea,,\n";
+        try {
+            rejects(fn() => Inventory::importCatalog($collisionCsv),409);
+            same($before,[
+                (int)DB::one('SELECT COUNT(*) AS total FROM folders')['total'],
+                (int)DB::one('SELECT COUNT(*) AS total FROM item_types')['total'],
+                (int)DB::one('SELECT COUNT(*) AS total FROM assets')['total'],
+                (int)DB::one('SELECT COUNT(*) AS total FROM inventory_imports')['total'],
+            ]);
+        } finally {
+            DB::execute('DELETE FROM assets WHERE item_type_id=? AND asset_tag=?',[$accessory,'CATALOG-CONFLICT-0001']);
+        }
+    });
     Inventory::import($fixture,"SN-01\nSN-02\nSN-03\nSN-04\nSN-05\nSN-06",'text');
     Inventory::import($accessory,"SAFE-01\nSAFE-02\nSAFE-03\nSAFE-04\nSAFE-05\nSAFE-06",'text');
     $today = gmdate('Y-m-d');

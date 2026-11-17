@@ -22,7 +22,7 @@ final class OperationsController
         $show = Shows::find((int)$revision['show_id']);
         $lines = Orders::lines($id);
         $mode = Settings::get('pull_mode','barcode');
-        \shop_view('operations/pull',compact('revision','show','lines','mode')+['title'=>'Pull ' . $revision['number'],'workspaceKey'=>'pull:' . $id]);
+        \shop_view('operations/pull',compact('revision','show','lines','mode')+['title'=>'Pull ' . $revision['number'],'workspaceKey'=>'show:' . $show['id'],'workspaceLabel'=>$show['name']]);
     }
 
     public function pullSave(int $id): void
@@ -35,7 +35,7 @@ final class OperationsController
         $show = Shows::find($id);
         $lines = DB::all('SELECT i.id,i.name,COUNT(a.id) AS quantity FROM assignments a JOIN assets s ON s.id=a.asset_id JOIN item_types i ON i.id=s.item_type_id WHERE a.show_id=? AND a.ended_at IS NULL GROUP BY i.id,i.name ORDER BY i.name',[$id]);
         $mode = Settings::get('return_mode','barcode');
-        \shop_view('operations/returns',compact('show','lines','mode')+['title'=>'Return ' . $show['name'],'workspaceKey'=>'return:' . $id]);
+        \shop_view('operations/returns',compact('show','lines','mode')+['title'=>'Return ' . $show['name'],'workspaceKey'=>'show:' . $show['id'],'workspaceLabel'=>$show['name']]);
     }
 
     public function returnSave(int $id): void
@@ -79,7 +79,8 @@ final class OperationsController
     {
         $operation = DB::one('SELECT o.*,s.name AS show_name FROM operations o JOIN shows s ON s.id=o.show_id WHERE o.id=?',[$id]) ?? throw new HttpException(404,'Operation not found.');
         $events = DB::all('SELECT a.asset_tag,e.state,e.details,e.created_at FROM asset_events e JOIN assets a ON a.id=e.asset_id WHERE e.operation_id=? ORDER BY e.id',[$id]);
-        \shop_view('operations/detail',compact('operation','events')+['title'=>$operation['type'] . ' #' . $id,'workspaceKey'=>'operation:' . $id]);
+        \shop_view('operations/detail',compact('operation','events')+['title'=>$operation['type'] . ' #' . $id,
+            'workspaceKey'=>'show:' . $operation['show_id'],'workspaceLabel'=>$operation['show_name']]);
     }
 
     public function note(int $id): void

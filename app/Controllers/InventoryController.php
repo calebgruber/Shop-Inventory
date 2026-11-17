@@ -12,7 +12,7 @@ final class InventoryController
     public function categories(): void
     {
         $folders = DB::all('SELECT * FROM folders ORDER BY sort_position,id');
-        $types = DB::all('SELECT * FROM item_types ORDER BY sort_position,id');
+        $types = DB::all('SELECT i.*,COUNT(a.id) AS shop_quantity FROM item_types i LEFT JOIN assets a ON a.item_type_id=i.id GROUP BY i.id ORDER BY i.sort_position,i.id');
         \shop_view('inventory/categories',compact('folders','types')+['title'=>'Inventory Categories','workspaceKey'=>'categories']);
     }
 
@@ -50,16 +50,25 @@ final class InventoryController
     public function import(): void
     {
         $data = \input();
-        $format = Validation::choice($data['format'] ?? 'csv',['csv','text'],'import format');
-        $content = Validation::text($data['content'] ?? '', 'Import data',2097152,false);
+        $mode = Validation::choice($data['import_mode'] ?? 'catalog',['catalog','serialized'],'import mode');
+        $content = $data['content'] ?? '';
         if (isset($_FILES['csv']) && $_FILES['csv']['error']!==UPLOAD_ERR_NO_FILE) {
             $file = $_FILES['csv'];
             if ($file['error']!==UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name']) || filesize($file['tmp_name'])>2097152) {
                 throw new HttpException(422,'CSV upload failed or exceeds 2 MB.');
             }
             $content = file_get_contents($file['tmp_name']);
-            $format = 'csv';
         }
+        if (!is_string($content) || strlen($content)>2097152) {
+            throw new HttpException(413,'Import data must be no larger than 2 MB.');
+        }
+        if ($mode==='catalog') {
+            $result = Inventory::importCatalog($content);
+            $message = "{$result['rows']} rows processed; {$result['created_item_types']} item types created; {$result['assets_added']} serialized assets added.";
+            \json_response(['message'=>$message,'summary'=>$result,'redirect'=>'/inventory']);
+        }
+        $format = Validation::choice($data['format'] ?? 'csv',['csv','text'],'import format');
+        Validation::text($content,'Import data',2097152,false);
         $count = Inventory::import(Validation::positive($data['item_type_id'] ?? 0,'Item type'),$content,$format);
         \json_response(['message'=>"$count assets imported.",'redirect'=>'/inventory']);
     }

@@ -101,19 +101,17 @@
             link.dataset.workspace = '';
             if (tab.key === activeKey) link.setAttribute('aria-current', 'page');
             wrapper.append(link);
-            if (tab.key !== 'dashboard') {
-                const close = text('button', 'close', 'material-symbols-rounded');
-                close.type = 'button';
-                close.setAttribute('aria-label', `Close ${tab.label} workspace`);
-                close.addEventListener('click', () => {
-                    const index = tabs.findIndex(item => item.key === tab.key);
-                    tabs = tabs.filter(item => item.key !== tab.key);
-                    if (activeKey === tab.key) navigate(tabs[Math.max(0, index - 1)]?.url || '/dashboard');
-                    renderTabs();
-                    persistTabs();
-                });
-                wrapper.append(close);
-            }
+            const close = text('button', 'close', 'material-symbols-rounded');
+            close.type = 'button';
+            close.setAttribute('aria-label', `Close ${tab.label} workspace`);
+            close.addEventListener('click', () => {
+                const index = tabs.findIndex(item => item.key === tab.key);
+                tabs = tabs.filter(item => item.key !== tab.key);
+                if (activeKey === tab.key) navigate(tabs[Math.max(0, index - 1)]?.url || '/dashboard');
+                renderTabs();
+                persistTabs();
+            });
+            wrapper.append(close);
             root.append(wrapper);
         }
     }
@@ -127,6 +125,7 @@
     }
 
     function openTab(key, label, url) {
+        if (!/^show:\d+$/.test(key)) return false;
         const existing = tabs.find(tab => tab.key === key);
         if (existing) {
             existing.label = label;
@@ -155,7 +154,12 @@
         try {
             const result = await api(url, { headers: { 'X-Workspace': '1', ...(live ? { 'X-Shop-Live-Refresh': '1' } : {}) }, signal: controller.signal });
             if (controller.signal.aborted) return;
-            if (!openTab(result.key, result.label, url)) return;
+            if (/^show:\d+$/.test(result.key)) {
+                if (!openTab(result.key,result.label,url)) return;
+            } else {
+                activeKey = null;
+                renderTabs();
+            }
             csrfToken = result.csrf;
             $('meta[name="csrf-token"]').content = csrfToken;
             const root = $('#workspace-content');
@@ -666,6 +670,23 @@
             scan(station, $('[data-scan-input]', station).value);
         }
     });
+    document.addEventListener('change', event => {
+        const mode = event.target.closest('[data-import-mode]');
+        if (!mode) return;
+        const serialized = mode.value==='serialized';
+        const fields = $('[data-serialized-fields]');
+        const help = $('[data-catalog-help]');
+        fields.hidden=!serialized;
+        help.hidden=serialized;
+        $$('input,select',fields).forEach(field => {
+            field.disabled=!serialized;
+            field.required=serialized && field.name==='item_type_id';
+        });
+        const content=$('[data-import-content]',mode.form);
+        content.placeholder=serialized
+            ? 'asset_tag,serial_number\nS4-0001,SN-123\nS4-0002,SN-124'
+            : 'category,name,shop_quantity,unit,default_note,description\nFIXTURES,ETC Source 4,12,ea,,';
+    });
     document.addEventListener('click', async event => {
         const link = event.target.closest('a[data-workspace]');
         if (link && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.button === 0) {
@@ -790,10 +811,14 @@
     });
     const workspace = $('#workspace-content');
     if (workspace) {
-        try { tabs = JSON.parse($('#workspace-tabs').dataset.tabs); }
-        catch { notify('Saved workspace data could not be read. Resetting this page to the dashboard tab.', true); }
-        if (!tabs.some(tab => tab.key === 'dashboard')) tabs.unshift({ key: 'dashboard', label: 'Dashboard', url: '/dashboard' });
-        openTab(workspace.dataset.key, workspace.dataset.label, location.pathname + location.search);
+        try { tabs = JSON.parse($('#workspace-tabs').dataset.tabs).filter(tab => /^show:\d+$/.test(tab.key)); }
+        catch { notify('Saved workspace data could not be read. Resetting the open show tabs.', true); }
+        if (/^show:\d+$/.test(workspace.dataset.key)) {
+            openTab(workspace.dataset.key,workspace.dataset.label,location.pathname + location.search);
+        } else {
+            activeKey=null;
+            renderTabs();
+        }
         highlightNavigation();
     }
     initialize(document);

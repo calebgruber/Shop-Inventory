@@ -41,7 +41,7 @@ shop_route('POST','/shows/add',fn() => app($workspace)->showSave(),'shows.edit')
 shop_route('GET','/shows/{id}',[$workspace,'show'],'shows.view');
 shop_route('GET','/shows/{id}/edit',[$workspace,'showForm'],'shows.edit');
 shop_route('POST','/shows/{id}/edit',[$workspace,'showSave'],'shows.edit');
-foreach (['overview','orders','revisions','pulls','returns','repairs','files','history','timeline','notes'] as $tab) {
+foreach (['overview','orders','revisions','pulls','returns','files','history','timeline','notes'] as $tab) {
     shop_route('GET','/shows/{id}/' . $tab,fn(int $id) => app($workspace)->show($id,$tab),'shows.view');
 }
 shop_route('GET','/shows/{id}/orders/add',fn(int $id) => app($workspace)->orderForm($id),'orders.edit');

@@ -88,7 +88,7 @@ final class Migrations
             preg_match_all('/CREATE TABLE IF NOT EXISTS\s+([a-z_][a-z0-9_]*)/i',$source,$matches);
             array_push($tables,...$matches[1]);
         }
-        return array_values(array_unique([...$tables,'migrations','laravel_migrations']));
+        return array_values(array_unique([...$tables,'migrations','laravel_migrations','inventory_imports']));
     }
 
     public static function existingTables(): array

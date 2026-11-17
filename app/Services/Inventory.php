@@ -196,6 +196,223 @@ final class Inventory
         return $rows;
     }
 
+    public static function parseCatalog(string $content): array
+    {
+        if ($content==='' || strlen($content)>2097152) {
+            throw new HttpException(413,'Catalog imports must contain CSV data and be no larger than 2 MB.');
+        }
+        $content = preg_replace('/^\xEF\xBB\xBF/','',$content);
+        $stream = fopen('php://temp','w+b');
+        if ($stream===false) {
+            throw new \RuntimeException('Unable to parse the catalog CSV.');
+        }
+        try {
+            fwrite($stream,$content);
+            rewind($stream);
+            $header = fgetcsv($stream,null,',','"','');
+            $header = array_map(static fn($field): string => strtolower(trim((string)$field)),$header ?: []);
+            $lighting = ['category','name','shop_quantity','unit','default_note','description'];
+            $sound = ['category','category','name','sku','shop_quantity','unit','default_note','description'];
+            $soundFormat = $header===$sound;
+            if ($header!==$lighting && !$soundFormat) {
+                throw new HttpException(422,'CSV headers must match either the lighting format (category, name, shop_quantity, unit, default_note, description) or sound format (category, category, name, sku, shop_quantity, unit, default_note, description).');
+            }
+            $rows = [];
+            $totalQuantity = 0;
+            $line = 1;
+            while (($fields=fgetcsv($stream,null,',','"',''))!==false) {
+                $line++;
+                if ($fields===[null] || count($fields)===1 && trim((string)$fields[0])==='') {
+                    continue;
+                }
+                $expected = $soundFormat?8:6;
+                if (count($fields)!==$expected) {
+                    throw new HttpException(422,"Catalog CSV row $line must contain exactly $expected columns.");
+                }
+                $category = $soundFormat?trim((string)$fields[0]):'Lighting';
+                $subcategory = $soundFormat?trim((string)$fields[1]):trim((string)$fields[0]);
+                $name = trim((string)$fields[$soundFormat?2:1]);
+                $quantityValue = trim((string)$fields[$soundFormat?4:2]);
+                if ($name==='' && ($quantityValue==='' || $quantityValue==='0')) {
+                    continue;
+                }
+                if ($category==='' || $subcategory==='' || $name==='') {
+                    throw new HttpException(422,"Catalog CSV row $line is missing its category or equipment name.");
+                }
+                if ($quantityValue!=='' && !preg_match('/^\d+$/D',$quantityValue)) {
+                    throw new HttpException(422,"Catalog CSV row $line has an invalid shop quantity.");
+                }
+                $quantity = $quantityValue===''?0:(int)$quantityValue;
+                if ($quantity>50000 || ($totalQuantity+=$quantity)>25000) {
+                    throw new HttpException(422,'A catalog import may create at most 25,000 serialized assets.');
+                }
+                $unit = trim((string)$fields[$soundFormat?5:3]) ?: 'ea';
+                $note = trim((string)$fields[$soundFormat?6:4]);
+                $description = trim((string)$fields[$soundFormat?7:5]);
+                $rows[] = [
+                    'category'=>Validation::text($category,'Category',160),
+                    'subcategory'=>Validation::text($subcategory,'Subcategory',160),
+                    'name'=>Validation::text($name,'Item name',160),
+                    'sku'=>$soundFormat?Validation::text(trim((string)$fields[3]),'SKU',80,false):'',
+                    'shop_quantity'=>$quantity,
+                    'unit'=>Validation::text($unit,'Unit',20),
+                    'default_note'=>in_array($note,['','.'],true)?'':Validation::text($note,'Default note',10000,false),
+                    'description'=>in_array($description,['','.'],true)?'':Validation::text($description,'Description',10000,false),
+                ];
+                if (count($rows)>5000) {
+                    throw new HttpException(422,'Import between 1 and 5000 catalog rows at a time.');
+                }
+            }
+        } finally {
+            fclose($stream);
+        }
+        if (!$rows) {
+            throw new HttpException(422,'No named catalog items were found.');
+        }
+        $aggregated = [];
+        foreach ($rows as $row) {
+            $key = json_encode(array_diff_key($row,['shop_quantity'=>true]),JSON_THROW_ON_ERROR);
+            if (!isset($aggregated[$key])) {
+                $aggregated[$key]=$row;
+            } else {
+                $aggregated[$key]['shop_quantity']+=$row['shop_quantity'];
+                if ($aggregated[$key]['shop_quantity']>50000) {
+                    throw new HttpException(422,'A catalog item exceeds the 50,000 unit import limit.');
+                }
+            }
+        }
+        return ['rows'=>array_values($aggregated),'row_count'=>count($rows),'asset_count'=>$totalQuantity];
+    }
+
+    public static function importCatalog(string $content): array
+    {
+        $contentHash = hash('sha256',preg_replace('/^\xEF\xBB\xBF/','',$content));
+        $parsed = self::parseCatalog($content);
+        $rows = $parsed['rows'];
+        return DB::transaction(function () use ($contentHash,$parsed,$rows): array {
+            if (DB::one('SELECT id FROM inventory_imports WHERE content_hash=? FOR UPDATE',[$contentHash])) {
+                throw new HttpException(409,'This exact catalog CSV was already imported. No inventory was changed.');
+            }
+            $userId = (int)Auth::user()['id'];
+            $categories = [];
+            $subcategories = [];
+            $createdTypes = 0;
+            $addedAssets = 0;
+            $typeResults = [];
+            foreach ($rows as $row) {
+                $categoryKey = mb_strtolower($row['category']);
+                if (!isset($categories[$categoryKey])) {
+                    $existing = DB::one('SELECT id FROM folders WHERE parent_id IS NULL AND LOWER(name)=LOWER(?) ORDER BY id LIMIT 1',[$row['category']]);
+                    $categories[$categoryKey] = $existing?(int)$existing['id']:
+                        DB::insert('INSERT INTO folders(parent_id,name,sort_position) VALUES (NULL,?,?)',
+                            [$row['category'],(int)DB::one('SELECT COALESCE(MAX(sort_position),0)+1 AS position FROM folders WHERE parent_id IS NULL')['position']]);
+                }
+                $subcategoryKey = $categoryKey . "\0" . mb_strtolower($row['subcategory']);
+                if (!isset($subcategories[$subcategoryKey])) {
+                    $existing = DB::one('SELECT id FROM folders WHERE parent_id=? AND LOWER(name)=LOWER(?) ORDER BY id LIMIT 1',[$categories[$categoryKey],$row['subcategory']]);
+                    $subcategories[$subcategoryKey] = $existing?(int)$existing['id']:
+                        DB::insert('INSERT INTO folders(parent_id,name,sort_position) VALUES (?,?,?)',
+                            [$categories[$categoryKey],$row['subcategory'],(int)DB::one('SELECT COALESCE(MAX(sort_position),0)+1 AS position FROM folders WHERE parent_id=?',[$categories[$categoryKey]])['position']]);
+                }
+                $type = DB::one('SELECT * FROM item_types WHERE folder_id=? AND LOWER(name)=LOWER(?) AND sku <=> ? ORDER BY id LIMIT 1 FOR UPDATE',
+                    [$subcategories[$subcategoryKey],$row['name'],$row['sku']!==''?$row['sku']:null]);
+                if (!$type) {
+                    $prefix = self::catalogPrefix($row,$categories[$categoryKey],$subcategories[$subcategoryKey]);
+                    $position = (int)DB::one('SELECT COALESCE(MAX(sort_position),0)+1 AS position FROM item_types WHERE folder_id=?',[$subcategories[$subcategoryKey]])['position'];
+                    $typeId = DB::insert('INSERT INTO item_types(folder_id,name,prefix,sort_position,sku,unit,default_note,description) VALUES (?,?,?,?,?,?,?,?)',
+                        [$subcategories[$subcategoryKey],$row['name'],$prefix,$position,$row['sku']!==''?$row['sku']:null,$row['unit'],$row['default_note']?:null,$row['description']?:null]);
+                    $createdTypes++;
+                    Audit::record('item_type.created','item_type',$typeId,['source'=>'catalog_import','sku'=>$row['sku']]);
+                    $existingCount = 0;
+                } else {
+                    $typeId = (int)$type['id'];
+                    $existingCount = (int)DB::one('SELECT COUNT(*) AS total FROM assets WHERE item_type_id=?',[$typeId])['total'];
+                    DB::execute('UPDATE item_types SET sku=?,unit=?,default_note=?,description=? WHERE id=?',
+                        [$row['sku']!==''?$row['sku']:null,$row['unit'],$row['default_note']?:null,$row['description']?:null,$typeId]);
+                }
+                $quantityToAdd = max(0,$row['shop_quantity']-$existingCount);
+                if ($quantityToAdd>0) {
+                    $addedAssets+=self::createCatalogAssets($typeId,$type['prefix'] ?? DB::one('SELECT prefix FROM item_types WHERE id=?',[$typeId])['prefix'],$quantityToAdd,$userId);
+                }
+                $typeResults[]=['id'=>$typeId,'name'=>$row['name'],'requested'=>$row['shop_quantity'],'existing'=>$existingCount,'added'=>$quantityToAdd];
+            }
+            DB::insert('INSERT INTO inventory_imports(content_hash,row_count,item_type_count,asset_count,created_by) VALUES (?,?,?,?,?)',
+                [$contentHash,$parsed['row_count'],count($rows),$addedAssets,$userId]);
+            Audit::record('inventory.catalog_imported','inventory',0,[
+                'rows'=>$parsed['row_count'],'item_types'=>count($rows),'created_item_types'=>$createdTypes,
+                'added_assets'=>$addedAssets,'source_hash'=>$contentHash,'items'=>$typeResults,
+            ]);
+            Documents::generate('inventory',0);
+            return ['rows'=>$parsed['row_count'],'item_types'=>count($rows),'created_item_types'=>$createdTypes,'assets_added'=>$addedAssets];
+        });
+    }
+
+    private static function catalogPrefix(array $row,int $categoryId,int $subcategoryId): string
+    {
+        $source = ($row['sku']!==''?$row['sku']:$row['category'] . '-' . $row['subcategory'] . '-' . $row['name']);
+        $source = iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$source) ?: $source;
+        $stem = strtoupper(trim(preg_replace('/[^A-Za-z0-9]+/','-',$source),'-'));
+        $stem = substr($stem ?: "ITEM-$categoryId-$subcategoryId",0,20);
+        $candidate = $stem;
+        $suffix = 1;
+        while (DB::one('SELECT id FROM item_types WHERE prefix=? LIMIT 1',[$candidate])) {
+            $tail = '-' . ++$suffix;
+            $candidate = substr($stem,0,24-strlen($tail)) . $tail;
+        }
+        return $candidate;
+    }
+
+    private static function createCatalogAssets(int $typeId,string $prefix,int $quantity,int $userId): int
+    {
+        $existing = DB::all('SELECT asset_tag FROM assets WHERE item_type_id=? FOR UPDATE',[$typeId]);
+        $tags = array_column($existing,'asset_tag');
+        $next = 1;
+        foreach ($tags as $tag) {
+            if (preg_match('/^' . preg_quote($prefix,'/') . '-(\d+)$/D',$tag,$match)) {
+                $next=max($next,(int)$match[1]+1);
+            }
+        }
+        $created = 0;
+        while ($created<$quantity) {
+            $count=min(200,$quantity-$created);
+            $batchTags=[];
+            $values=[];
+            $params=[];
+            for ($i=0;$i<$count;$i++) {
+                $tag=$prefix . '-' . str_pad((string)$next++,4,'0',STR_PAD_LEFT);
+                if (in_array($tag,$tags,true)) {
+                    throw new HttpException(409,"Generated serialized asset tag $tag already exists.");
+                }
+                $tags[]=$tag;
+                $batchTags[]=$tag;
+                $values[]='(?,?,NULL)';
+                array_push($params,$typeId,$tag);
+            }
+            $placeholders=implode(',',array_fill(0,count($batchTags),'?'));
+            if (DB::one("SELECT id FROM assets WHERE asset_tag IN ($placeholders) LIMIT 1",$batchTags)) {
+                throw new HttpException(409,'One or more generated serialized asset tags already exist.');
+            }
+            DB::execute('INSERT INTO assets(item_type_id,asset_tag,serial_number) VALUES ' . implode(',',$values),$params);
+            $assets=DB::all("SELECT id,asset_tag FROM assets WHERE asset_tag IN ($placeholders)",$batchTags);
+            $eventRows=[];
+            $eventParams=[];
+            $auditRows=[];
+            $auditParams=[];
+            foreach ($assets as $asset) {
+                $eventRows[]='(?,?,?,?)';
+                array_push($eventParams,(int)$asset['id'],'Available',json_encode(['source'=>'catalog_import'],JSON_THROW_ON_ERROR),$userId);
+                $auditRows[]='(?,?,?,?,?,?)';
+                array_push($auditParams,$userId,'asset.created','asset',(int)$asset['id'],
+                    json_encode(['item_type_id'=>$typeId,'source'=>'catalog_import'],JSON_THROW_ON_ERROR),
+                    request()->ip() ?? '127.0.0.1');
+            }
+            DB::execute('INSERT INTO asset_events(asset_id,state,details,created_by) VALUES ' . implode(',',$eventRows),$eventParams);
+            DB::execute('INSERT INTO audit_logs(user_id,action,entity_type,entity_id,details,ip_address) VALUES ' . implode(',',$auditRows),$auditParams);
+            $created+=$count;
+        }
+        return $created;
+    }
+
     public static function import(int $typeId, string $content, string $format): int
     {
         Validation::choice($format,['csv','text'],'import format');
